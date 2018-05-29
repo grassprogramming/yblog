@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home1</title>
+    <script src="../common/base_stylesheet.js"></script>
+    <script src="../common/base_javascript.js"></script>
+</head>
+<body>
+<div id="app">
+    <template>
+        <div class="block">
+            <el-carousel height="500px">
+                <el-carousel-item v-for="image in images" :key="image">
+                    <img v-bind:src="image.url" style="width: 100%">
+                </el-carousel-item>
+            </el-carousel>
+        </div>
+    </template>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data:{images:[{"url":"../images/1.jpg"},{"url":"../images/2.jpg"},{"url":"../images/3.jpg"},{"url":"../images/4.jpg"}]},
+    })
+</script>
+</body>
+</html>

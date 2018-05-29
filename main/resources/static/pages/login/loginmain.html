@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>regist</title>
+    <script src="../../common/base_stylesheet.js"></script>
+    <script src="../../common/base_javascript.js"></script>
+    <style>
+
+        #login-content{
+            margin-right: 200px;
+            margin-top: 15%;
+            float: right;
+            width: 300px;
+        }
+        .el-input-group__prepend{
+            width: 70px;
+
+        }
+
+    </style>
+</head>
+<body>
+<div>
+    <div id="pagetitle">
+
+    </div>
+    <div id="login-content">
+        <el-row>
+            <el-col :span="24">
+                <el-input id="loginid"  v-model="loginid" placeholder="请输入用户名">
+                    <template style="width: 100px"  slot="prepend" >帐号</template>
+                </el-input>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="24">
+                <el-input id="password" v-model="password" type="password" placeholder="请输入密码">
+                    <template slot="prepend">密码</template>
+                </el-input>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col :span="24">
+                <el-button id="login" v-on:click="check" style="width:100%" type="primary">登陆</el-button>
+            </el-col>
+        </el-row>
+    </div>
+</div>
+</body>
+<script>
+    new Vue({
+        el : '#login-content',
+        data : {
+            loginid : '',
+            password : ''
+        },
+        methods : {
+            check : function(event){
+                //获取值
+                var loginid = this.loginid;
+                var password = this.password;
+                if(loginid == '' || password == ''){
+                    this.$message({
+                        message : '账号或密码为空！',
+                        type : 'error'
+                    })
+                    return;
+                }
+                var url = GetRootPath()+"login/loginin";
+                var auth = $.md5(loginid+password);
+                $.ajax({
+                    url : url,
+                    type : 'post',
+                    data : {
+                        loginid : loginid,
+                        auth : auth
+                    },
+                    success : function(data) {
+                        var status = data.status;
+                        if(status == '1'){
+                            $(window).attr('location', GetRootPath()+"/home/index.html");
+                        }else {
+                            alert(data.message);
+                        }
+                    },
+                    error : function(data) {
+                        alert(data);
+                    },
+                    dataType : 'json',
+                })
+            }
+        }
+    })
+</script>
+</html>
