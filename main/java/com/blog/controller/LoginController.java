@@ -37,7 +37,7 @@ public class LoginController {
     @RequestMapping("/login/loginin")
     @ResponseBody
     public Map<Object,Object> getAllUser(String loginid,String auth,HttpServletRequest request) throws Exception{
-        Map<String,String> sessionmap = new HashMap<>();
+        Map<Object,Object> sessionmap = new HashMap<>();
         Map<Object,Object>  map = new HashMap<Object,Object>();
         String sql = MessageFormat.format("select * from frame_user where loginid={0}",new Object[]{"'"+loginid+"'"});
         System.out.println(sql);
@@ -52,7 +52,10 @@ public class LoginController {
                 map.put("message","用户存在！");
                 sessionmap.put("loginid",loginid);
                 sessionmap.put("username",user.getDisplayname());
+                //以json方式存入
                 redisUtil.redisTemplateSet(request.getSession().getId(),sessionmap);
+                //以list方式存入,具体内容以键值对形式存储，结构比较清晰
+                //redisUtil.redisTemplateSetForList(request.getSession().getId(),sessionmap);
             }else{
                 map.put("status","0");
                 map.put("message","密码不正确！");

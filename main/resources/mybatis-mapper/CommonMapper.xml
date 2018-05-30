@@ -8,4 +8,7 @@
         ${sqlStr}
     </select>
 
+    <select id="executeSql" parameterType="String" >
+        ${sqlStr}
+    </select>
 </mapper>

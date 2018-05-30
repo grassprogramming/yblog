@@ -12,5 +12,5 @@ import java.util.List;
 @Mapper
 public interface CommonMapper {
     public List<LinkedHashMap<String, Object>> findList(@Param("sqlStr") String sqlStr);
-
+    public void executeSql(@Param("sqlStr") String sqlStr);
 }

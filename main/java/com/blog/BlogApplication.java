@@ -1,5 +1,7 @@
 package com.blog;
 
+import com.blog.entity.Sys_Config;
+import com.blog.util.CommonDao;
 import com.github.pagehelper.PageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +15,7 @@ import java.util.Properties;
 public class BlogApplication {
 
 	private static final Logger logger = LoggerFactory.getLogger(BlogApplication.class);
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		SpringApplication.run(BlogApplication.class, args);
 		logger.info("testinfo");
 	}

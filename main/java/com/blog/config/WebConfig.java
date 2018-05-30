@@ -14,7 +14,7 @@ public class WebConfig  implements WebMvcConfigurer {
 
     @Autowired
     private SessionInterceptor sessionInterceptor;
-    final String[] notLoginInterceptPaths = {"/common/**","/pages/login/**","/error","/login/**"};
+    final String[] notLoginInterceptPaths = {"/common/**","/webjars/**","/pages/login/**","/error","/login/**"};
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(sessionInterceptor).addPathPatterns("/**").excludePathPatterns(notLoginInterceptPaths);

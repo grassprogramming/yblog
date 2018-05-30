@@ -10,13 +10,15 @@ import com.mysql.jdbc.TimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
+import javax.swing.text.StyledEditorKit;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
@@ -46,6 +48,14 @@ public class RedisUtil {
         ops.getOperations().delete(key);
     }
 
+    public void redisTemplateSetForList(Object key, Map<Object,Object> map){
+        HashOperations<Object, Object,Object> ops =redis.opsForHash();
+        for(Map.Entry<Object, Object> entry : map.entrySet()){
+            ops.put(key,entry.getKey(),entry.getValue());
+        }
+        redis.expire(key,20, TimeUnit.MINUTES);
+    }
+
     @Bean
     public RedisTemplate redisTemplate(RedisConnectionFactory factory) {
         // 创建一个模板类
@@ -57,13 +67,16 @@ public class RedisUtil {
         // 设置value的序列化器
         //使用Jackson 2，将对象序列化为JSON
         Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
-        /*//json转对象类，不设置默认的会将json转成hashmap
+     /*   //json转对象类，不设置默认的会将json转成hashmap
         ObjectMapper om = new ObjectMapper();
         om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
         jackson2JsonRedisSerializer.setObjectMapper(om);*/
         template.setValueSerializer(jackson2JsonRedisSerializer);
-
+        //设置hashmap的key,value序列化方式，防止出现乱码
+        RedisSerializer stringSerializer = new StringRedisSerializer();
+        template.setHashKeySerializer(stringSerializer);
+        template.setHashValueSerializer(stringSerializer);
         return template;
     }
 
