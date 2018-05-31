@@ -2,14 +2,101 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>config</title>
+    <title>config_list</title>
     <script src="../../common/base_stylesheet.js"></script>
     <script src="../../common/base_javascript.js"></script>
+
 </head>
 <body>
-
+<div id="app">
+    <el-button type="primary" @click="openAdd">新增</el-button>
+    <el-input v-model="searchConfigName" placeholder="请输参数名" style="width:240px"></el-input>
+    <el-button type="primary" @click="search">搜索</el-button>
+    <template>
+        <el-table
+                :data="datalist"
+                style="width: 100%">
+            <el-table-column
+                    prop="configtext"
+                    label="参数名"
+                    width="280">
+            </el-table-column>
+            <el-table-column
+                    prop="configvalue"
+                    label="参数值"
+                    width="280">
+            </el-table-column>
+            <el-table-column
+                    prop="conifgintroduction"
+                    label="参数说明">
+            </el-table-column>
+            <el-table-column
+                    prop="ordernum"
+                    label="排序"
+                    width="100">
+            </el-table-column>
+        </el-table>
+    </template>
+    <div align="center">
+        <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="currentPage"
+                :page-size="pagesize"
+                layout="total,  prev, pager, next, jumper"
+                :total="totalnum">
+        </el-pagination>
+    </div>
+</div>
 </body>
 <script>
+    var tcurrentPage=1;
+    var tpagesize =1;
+    var tableData = {datalist: [],currentPage:tcurrentPage,pagesize:tpagesize,totalnum:1,searchConfigName:""};
+    var dataurl = GetRootPath()+"config/configlist";
+    new Vue({
+        el: '#app',
+        data:tableData,
+        created: loadata(tableData.searchConfigName),
+        methods: {
+            handleSizeChange: function (size) {
+                tpagesize = size;
+                loadata(tableData.searchConfigName);
+            },
+            handleCurrentChange: function(currentPage){
+                tcurrentPage = currentPage;
+                loadata(tableData.searchConfigName);
+            },
+            search:function () {
+                loadata(tableData.searchConfigName);
+            },
+            openAdd:function() {
+                OpenDialog("adddialog","新增系统参数","pages/config/config_add.html",400,800,afterClose);
+            }
+        }
+    })
+
+    //post提交，data要使用JSON.stringify进行转换，否则会作为get方法的数据跟在url后传递过去
+    function loadata(searchConfigName) {
+        $.ajax({
+            type: "POST",
+            url: dataurl,
+            contentType: "application/json;charset=uft-8",
+            data: JSON.stringify({"pageNum":tcurrentPage,"pageSize":tpagesize,"searchConfigName":searchConfigName}),
+            dataType : "json",
+            complete: function (data, status) {
+                Vue.set(tableData,"datalist",JSON.parse(data.responseText).datalist);
+                Vue.set(tableData,"currentPage",tcurrentPage);
+                Vue.set(tableData,"pagesize",tpagesize);
+                Vue.set(tableData,"totalnum",JSON.parse(data.responseText).totalnum)
+
+            }
+        })
+    }
+
+    function afterClose() {
+        alert("1");
+    }
 
 </script>
 </html>
