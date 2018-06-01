@@ -36,7 +36,9 @@
         created: loadata(),
         methods:{
             save:function () {
-                CloseDialog();
+                OpenSuccessDialog(function () {
+                    CloseDialog();
+                })
             },
             close:function () {
                 CloseDialog();
