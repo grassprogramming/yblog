@@ -52,6 +52,16 @@ public class CommonDao {
             return null;
         }
     }
+    public Object FindEntityWithRowGuid(String tableName,String rowGuid, Class entityClass) throws Exception{
+        String sql = MessageFormat.format("select * from {0} where rowguid={1}",tableName,"'"+rowGuid+"'");
+        List returnlist = findList(sql,entityClass);
+        if (returnlist.size()>0){
+            return returnlist.get(0);
+        }else{
+            return null;
+        }
+    }
+
 
     //insert
     public void insert(Object entity) throws Exception{
@@ -106,5 +116,12 @@ public class CommonDao {
         sqlbuilder.append(" "+fieldbuilder.toString());
         //System.out.println(sqlbuilder.toString());
         commonDao.icommonMapper.executeSql(sqlbuilder.toString());
+    }
+
+    //delete
+    public void delete(Object entity,String Key){
+        String tablename = entity.getClass().getName().replace(entity.getClass().getPackage().getName()+".","");
+        String sql = MessageFormat.format("delete from {0} where rowguid={1}",tablename,"'"+Key+"'");
+        icommonMapper.executeSql(sql);
     }
 }

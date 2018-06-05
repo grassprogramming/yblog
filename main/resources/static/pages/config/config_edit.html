@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>config_add</title>
+    <title>config_edit</title>
     <script src="../../common/base_stylesheet.js"></script>
     <script src="../../common/base_javascript.js"></script>
 </head>
@@ -29,7 +29,8 @@
 </div>
 </body>
 <script>
-    var dataurl = GetRootPath()+"config/configadd";
+    var datainiturl = GetRootPath()+"config/findone";
+    var datasaveurl = GetRootPath()+"config/configsave";
     var tableData = {data:{configtext:"",configvalue:"",conifgintroduction:"",ordernum:""}};
     new Vue({
         el: '#app',
@@ -38,7 +39,7 @@
         methods:{
             save:function () {
                 savedata(
-                    OpenSuccessDialog("添加成功！",function () {
+                    OpenSuccessDialog("保存成功！",function () {
                         CloseDialog();
                     })
                 )
@@ -49,13 +50,21 @@
         }
     })
     function loadata() {
-
+        $.ajax({
+            type: "POST",
+            url: datainiturl,
+            contentType: "application/json;charset=uft-8",
+            data: JSON.stringify({"rowguid":getUrlParams("rowguid")}),
+            dataType : "json",
+            complete: function (data, status) {
+                Vue.set(tableData,"data",JSON.parse(data.responseText).data);
+            }
+        })
     }
-
     function savedata(callback) {
         $.ajax({
             type: "POST",
-            url: dataurl,
+            url: datasaveurl,
             contentType: "application/json;charset=uft-8",
             data: JSON.stringify(tableData.data),
             dataType : "json",

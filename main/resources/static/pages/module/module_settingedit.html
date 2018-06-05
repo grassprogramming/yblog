@@ -2,21 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>config_add</title>
+    <title>config_edit</title>
     <script src="../../common/base_stylesheet.js"></script>
     <script src="../../common/base_javascript.js"></script>
 </head>
 <body>
 <div id="app" style="margin: 20px">
     <el-form ref="form" :model="data" label-width="80px" >
-        <el-form-item label="参数名">
-            <el-input v-model="data.configtext"></el-input>
+        <el-form-item label="模块名称">
+            <el-input v-model="data.modulename"></el-input>
         </el-form-item>
-        <el-form-item label="参数值">
-            <el-input v-model="data.configvalue"></el-input>
-        </el-form-item>
-        <el-form-item label="参数说明">
-            <el-input type="textarea" v-model="data.conifgintroduction"></el-input>
+        <el-form-item label="模块地址">
+            <el-input v-model="data.moduleurl"></el-input>
         </el-form-item>
         <el-form-item label="排序">
             <el-input v-model="data.ordernum"></el-input>
@@ -29,8 +26,9 @@
 </div>
 </body>
 <script>
-    var dataurl = GetRootPath()+"config/configadd";
-    var tableData = {data:{configtext:"",configvalue:"",conifgintroduction:"",ordernum:""}};
+    var datainiturl = GetRootPath()+"module/findone";
+    var datasaveurl = GetRootPath()+"module/save";
+    var tableData = {data:{modulename:"",moduleurl:"",ordernum:""}};
     new Vue({
         el: '#app',
         data:tableData,
@@ -38,7 +36,7 @@
         methods:{
             save:function () {
                 savedata(
-                    OpenSuccessDialog("添加成功！",function () {
+                    OpenSuccessDialog("保存成功！",function () {
                         CloseDialog();
                     })
                 )
@@ -49,13 +47,21 @@
         }
     })
     function loadata() {
-
+        $.ajax({
+            type: "POST",
+            url: datainiturl,
+            contentType: "application/json;charset=uft-8",
+            data: JSON.stringify({"rowguid":getUrlParams("rowguid")}),
+            dataType : "json",
+            complete: function (data, status) {
+                Vue.set(tableData,"data",JSON.parse(data.responseText).data);
+            }
+        })
     }
-
     function savedata(callback) {
         $.ajax({
             type: "POST",
-            url: dataurl,
+            url: datasaveurl,
             contentType: "application/json;charset=uft-8",
             data: JSON.stringify(tableData.data),
             dataType : "json",

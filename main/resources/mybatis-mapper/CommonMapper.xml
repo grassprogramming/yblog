@@ -15,4 +15,8 @@
     <select id="queryInt" parameterType="String" resultType="int">
         ${sqlStr}
     </select>
+
+    <select id="queryString" parameterType="String" resultType="String">
+        ${sqlStr}
+    </select>
 </mapper>

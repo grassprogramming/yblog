@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../../common/base_stylesheet.js"></script>
+    <script src="../../common/base_javascript.js"></script>
+</head>
+<style>
+    html,
+    body{
+        height: 100%; padding: 0; margin: 0;
+    }
+    #app{
+        height: 100%; padding: 0; margin: 0;
+    }
+    .el-container,el-aside,el-main{
+        height: 100%; padding: 0; margin: 0;
+    }
+</style>
+<body>
+<div id="app">
+
+    <el-container>
+        <el-aside width="200px" style="border-right: 1px solid black;height:100%">
+            <div id="tree" ></div>
+        </el-aside>
+        <el-main>
+            <el-button type="primary" @click="openAdd">新增</el-button>
+            <div id="class">
+                <template>
+                    <el-table
+                            :data="datalist"
+                            style="width: 100%">
+                        <el-table-column
+                                type="index"
+                                label="序号"
+                                :index="indexMethod">
+                        </el-table-column>
+                        <el-table-column
+                                prop="modulename"
+                                label="模块名称"
+                                width="280">
+                        </el-table-column>
+                        <el-table-column
+                                prop="moduleurl"
+                                label="模块地址">
+                        </el-table-column>
+                        <el-table-column
+                                prop="ordernum"
+                                label="排序"
+                                width="100">
+                        </el-table-column>
+                        <el-table-column label="操作"  width="200">
+                            <template slot-scope="scope">
+                                <el-button
+                                        size="mini"
+                                        @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                                <el-button
+                                        size="mini"
+                                        type="danger"
+                                        @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </template>
+                <div align="center">
+                    <el-pagination
+                            @size-change="handleSizeChange"
+                            @current-change="handleCurrentChange"
+                            :current-page="currentPage"
+                            :page-size="pagesize"
+                            layout="total,  prev, pager, next, jumper"
+                            :total="totalnum">
+                    </el-pagination>
+                </div>
+            </div>
+        </el-main>
+    </el-container>
+</div>
+
+</body>
+<script>
+    var selectnodevalue = '';
+    var tcurrentPage=1;
+    var tpagesize =15;
+    var tableData = {datalist: [],currentPage:tcurrentPage,pagesize:tpagesize,totalnum:1,selectnodevalue:""};
+    var dataurl = GetRootPath()+"module/list";
+    var deletedataurl = GetRootPath()+"module/delete";
+    var treedataurl = GetRootPath()+"module/codelist";
+    new Vue({
+        el: '#app',
+        data:tableData,
+        created: loadata(),
+        methods: {
+            handleSizeChange: function (size) {
+                tpagesize = size;
+                loadata();
+            },
+            handleCurrentChange: function(currentPage){
+                tcurrentPage = currentPage;
+                loadata();
+            },
+            handleEdit(index, row) {
+                OpenDialog("editdialog","编辑模块信息","pages/module/module_settingedit.html?rowguid="+row.rowguid,400,800,afterClose);
+            },
+            handleDelete(index, row) {
+                OpenConfirmDialog("确认删除?",function () {
+                    $.ajax({
+                        type: "POST",
+                        url: deletedataurl,
+                        contentType: "application/json;charset=uft-8",
+                        data: JSON.stringify({"rowguid":row.rowguid}),
+                        dataType : "json",
+                        complete: function (data, status) {
+                            if(JSON.parse(data.responseText).executestatus=="1"){
+                                OpenSuccessDialog("删除成功",loadata());
+                                loadtree();
+                            }
+                        }
+                    })
+                });
+            },
+            search:function () {
+                loadata();
+            },
+            openAdd:function() {
+                OpenDialog("adddialog","新增模块","pages/module/module_settingadd.html?parentcode="+selectnodevalue,400,800,afterClose);
+            },
+            indexMethod(index) {
+                return index + 1;
+            }
+        }
+    })
+    loadtree();
+
+    function loadtree() {
+        $.ajax({
+            type: "POST",
+            url: treedataurl,
+            contentType: "application/json;charset=uft-8",
+            data:JSON.stringify({}),
+            dataType : "json",
+            complete: function (data, status) {
+                $('#tree').treeview({
+                    data: JSON.parse(data.responseText),
+                    onNodeSelected: function(event, data) {
+                        selectnodevalue = data.value;
+                        loadata();
+                    }
+                    /*backColor: '#293541',
+                     color: 'white',
+                     onhoverColor:'#202a33;',
+                     showBorder: false*/
+                });
+            }
+        })
+    }
+
+    //post提交，data要使用JSON.stringify进行转换，否则会作为get方法的数据跟在url后传递过去
+    function loadata() {
+        $.ajax({
+            type: "POST",
+            url: dataurl,
+            contentType: "application/json;charset=uft-8",
+            data: JSON.stringify({"pageNum":tcurrentPage,"pageSize":tpagesize,"selectnodevalue":selectnodevalue}),
+            dataType : "json",
+            complete: function (data, status) {
+                Vue.set(tableData,"datalist",JSON.parse(data.responseText).datalist);
+                Vue.set(tableData,"currentPage",tcurrentPage);
+                Vue.set(tableData,"pagesize",tpagesize);
+                Vue.set(tableData,"totalnum",JSON.parse(data.responseText).totalnum)
+
+            }
+        })
+
+    }
+
+    function afterClose() {
+        loadata();
+        loadtree();
+    }
+</script>
+</html>

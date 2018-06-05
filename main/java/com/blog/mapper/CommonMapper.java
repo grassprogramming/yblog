@@ -14,5 +14,6 @@ public interface CommonMapper {
     public List<LinkedHashMap<String, Object>> findList(@Param("sqlStr") String sqlStr);
     public void executeSql(@Param("sqlStr") String sqlStr);
     public int queryInt(@Param("sqlStr") String sqlStr);
+    public String queryString(@Param("sqlStr") String sqlStr);
 
 }

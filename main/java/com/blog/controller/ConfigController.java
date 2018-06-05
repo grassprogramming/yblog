@@ -26,18 +26,6 @@ public class ConfigController {
     @RequestMapping(value="/config/configlist",method= RequestMethod.POST)
     @ResponseBody
     public Map<Object,Object> configlist(@RequestBody Map<String,Object> reqMap) throws  Exception{
-        //新增测试
-        /*Sys_Config config = new Sys_Config();
-        config.setConfigtext("SystemHomeAddress");
-        config.setConfigvalue("http://localhost:9090/blog");
-        config.setConifgintroduction("系统地址");
-        config.setOrdernum(1);
-        commonDao.insert(config);*/
-        //更新测试
-       /* Sys_Config config = (Sys_Config)commonDao.FindEntity(MessageFormat.format("select * from sys_config where rowguid={0}",
-                "'48de573d-2f46-40b8-b9f1-4771022af4a0'"),Sys_Config.class);
-        config.setConifgintroduction("系统地址说明");
-        commonDao.update(config,"rowguid");*/
         int pageNum =Integer.parseInt(reqMap.get("pageNum").toString());
         int pageSize =Integer.parseInt(reqMap.get("pageSize").toString());
         String searchConfigName = reqMap.get("searchConfigName").toString();
@@ -48,6 +36,7 @@ public class ConfigController {
         if (!StringUtil.isEmpty(searchConfigName)){
             sql += MessageFormat.format(" and configtext like {0}","'%"+searchConfigName+"%'");
         }
+        sql +=" order by ordernum desc";
         List<Sys_Config> list = commonDao.findList(sql,Sys_Config.class);
         PageBean<Sys_Config> pageData = new PageBean<Sys_Config>(pageNum, pageSize,count);
         pageData.setItems(list);
@@ -56,6 +45,77 @@ public class ConfigController {
         map.put("currentPage",pageNum);
         map.put("pagesize",pageSize);
         map.put("totalnum",pageData.getTotalNum());
+        return map;
+    }
+
+    @RequestMapping(value="/config/configadd",method= RequestMethod.POST)
+    @ResponseBody
+    public Map<Object,Object> configadd(@RequestBody Map<String,Object> reqMap){
+        Map<Object,Object>  map = new HashMap<Object,Object>();
+        try {
+            String configtext = reqMap.get("configtext").toString();
+            String configvalue = reqMap.get("configvalue").toString();
+            String conifgintroduction = reqMap.get("conifgintroduction").toString();
+            int ordernum = Integer.parseInt(reqMap.get("ordernum").toString());
+            Sys_Config sysconfig = new Sys_Config();
+            sysconfig.setConfigtext(configtext);
+            sysconfig.setConfigvalue(configvalue);
+            sysconfig.setConifgintroduction(conifgintroduction);
+            sysconfig.setOrdernum(ordernum);
+            commonDao.insert(sysconfig);
+            map.put("executestatus","1");
+        }catch (Exception e){
+            map.put("executestatus","0");
+        }
+
+        return map;
+    }
+
+    @RequestMapping(value="/config/configdelete",method= RequestMethod.POST)
+    @ResponseBody
+    public Map<Object,Object> configdelete(@RequestBody Map<String,Object> reqMap){
+        Map<Object,Object>  map = new HashMap<Object,Object>();
+        try {
+            String rowguid = reqMap.get("rowguid").toString();
+            String sql = MessageFormat.format("delete from {0} where rowguid={1}","Sys_Config","'"+rowguid+"'");
+            icommonMapper.executeSql(sql);
+            map.put("executestatus","1");
+        }catch (Exception e){
+            map.put("executestatus","0");
+        }
+
+        return map;
+    }
+
+    @RequestMapping(value="/config/findone",method= RequestMethod.POST)
+    @ResponseBody
+    public Map<Object,Object> configfindone(@RequestBody Map<String,Object> reqMap){
+        Map<Object,Object>  map = new HashMap<Object,Object>();
+        try {
+            String rowguid = reqMap.get("rowguid").toString();
+            Sys_Config sys_config = (Sys_Config)commonDao.FindEntityWithRowGuid("sys_config",rowguid,Sys_Config.class);
+            map.put("data",sys_config);
+            map.put("executestatus","1");
+        }catch (Exception e){
+            System.out.println(e.toString());
+            map.put("executestatus","0");
+        }
+
+        return map;
+    }
+
+    @RequestMapping(value="/config/configsave",method= RequestMethod.POST)
+    @ResponseBody
+    public Map<Object,Object> configsave(@RequestBody Sys_Config sys_config){
+        Map<Object,Object>  map = new HashMap<Object,Object>();
+        try {
+            commonDao.update(sys_config,"rowguid");
+            map.put("executestatus","1");
+        }catch (Exception e){
+            System.out.println(e.toString());
+            map.put("executestatus","0");
+        }
+
         return map;
     }
 }

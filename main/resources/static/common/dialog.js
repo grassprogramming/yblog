@@ -30,24 +30,16 @@ function OpenDialog(id,title,url,height,width,callback) {
         dialogInstance.getModal().modal('hide');
 
     });
-    //打开窗口页面增加接受消息监听，在关闭事件后传递消息通知父级页面关闭dialog
-    window.addEventListener('message', receiveMessage, false);
-    function receiveMessage(tag) {
-        var tag = tag.toString();
-        if(tag='close'){
-            dialogInstance.close();
-        }
-    }
     dialogInstance.getModalBody().css('height',height);
     dialogInstance.getModalBody().css('padding','0');
     dialogInstance.open();
 }
 
 function OpenMessage() {
-    
+
 }
 
-function OpenSuccessDialog(callback) {
+function OpenSuccessDialog(message,callback) {
     var dialogInstance = new BootstrapDialog({
         buttons: [{
             label: '确定',
@@ -57,9 +49,48 @@ function OpenSuccessDialog(callback) {
         }],
         onhidden:callback
     });
+
     dialogInstance.setTitle('提示信息');
-    dialogInstance.setMessage('操作成功！');
+    dialogInstance.setMessage(message);
     dialogInstance.setType(BootstrapDialog.TYPE_SUCCESS);
+    dialogInstance.open();
+}
+
+function OpenErrorDialog(message) {
+    var dialogInstance = new BootstrapDialog({
+        buttons: [{
+            label: '确定',
+            action: function (dialogItself) {
+                dialogItself.close();
+            }
+        }],
+    });
+    dialogInstance.setTitle('提示信息');
+    dialogInstance.setMessage(message);
+    dialogInstance.setType(BootstrapDialog.TYPE_WARNING);
+    dialogInstance.open();
+}
+
+function OpenConfirmDialog(message,successcallack) {
+    var dialogInstance = new BootstrapDialog({
+        buttons: [{
+            label: '确定',
+            action: function (dialogItself) {
+                successcallack();
+                dialogItself.close();
+            }
+        },
+            {
+                label: '取消',
+                action: function (dialogItself) {
+                    dialogItself.close();
+                }
+            }
+        ],
+    });
+    dialogInstance.setTitle('信息确认');
+    dialogInstance.setMessage(message);
+    dialogInstance.setType(BootstrapDialog.TYPE_INFO);
     dialogInstance.open();
 }
 
