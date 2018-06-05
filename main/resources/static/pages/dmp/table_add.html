@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>table_add</title>
+    <script src="../../common/base_stylesheet.js"></script>
+    <script src="../../common/base_javascript.js"></script>
+</head>
+<body>
+<div id="app" style="margin: 20px">
+    <el-form ref="form" :model="data" label-width="80px" >
+        <el-form-item label="编号">
+            <el-input v-model="data.tablecode"></el-input>
+        </el-form-item>
+        <el-form-item label="名称">
+            <el-input v-model="data.tablename"></el-input>
+        </el-form-item>
+        <el-form-item label="表名">
+            <el-input v-model="data.sqltablename"></el-input>
+        </el-form-item>
+        <el-form-item label="排序">
+            <el-input v-model="data.ordernum"></el-input>
+        </el-form-item>
+    </el-form>
+    <div style="text-align: center">
+        <el-button type="primary" @click="save">保存</el-button>
+        <el-button type="primary" @click="close">关闭</el-button>
+    </div>
+</div>
+</body>
+<script>
+    var dataurl = GetRootPath()+"dmp/tableadd";
+    var tableData = {data:{tablecode:"",tablename:"",sqltablename:"",ordernum:""}};
+    new Vue({
+        el: '#app',
+        data:tableData,
+        created: loadata(),
+        methods:{
+            save:function () {
+                savedata(
+                    OpenSuccessDialog("添加成功！",function () {
+                        CloseDialog();
+                    })
+                )
+            },
+            close:function () {
+                CloseDialog();
+            }
+        }
+    })
+    function loadata() {
+
+    }
+
+    function savedata(callback) {
+        $.ajax({
+            type: "POST",
+            url: dataurl,
+            contentType: "application/json;charset=uft-8",
+            data: JSON.stringify(tableData.data),
+            dataType : "json",
+            complete: function (data, status) {
+                if(JSON.parse(data.responseText).executestatus=="1"){
+                    callback;
+                }else{
+                    OpenErrorDialog("保存数据失败！");
+                }
+            }
+        })
+    }
+</script>
+</html>

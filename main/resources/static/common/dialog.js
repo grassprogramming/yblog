@@ -31,6 +31,7 @@ function OpenDialog(id,title,url,height,width,callback) {
 
     });
     dialogInstance.getModalBody().css('height',height);
+    dialogInstance.getModalDialog().css('width',width);
     dialogInstance.getModalBody().css('padding','0');
     dialogInstance.open();
 }

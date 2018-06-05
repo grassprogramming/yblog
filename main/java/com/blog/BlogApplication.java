@@ -8,9 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.Properties;
-
+@EnableTransactionManagement
 @SpringBootApplication
 public class BlogApplication {
 

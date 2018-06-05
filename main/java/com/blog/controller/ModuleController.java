@@ -29,7 +29,7 @@ public class ModuleController {
 
     @RequestMapping(value="/module/list",method= RequestMethod.POST)
     @ResponseBody
-    public Map<Object,Object> configlist(@RequestBody Map<String,Object> reqMap) throws  Exception{
+    public Map<Object,Object> list(@RequestBody Map<String,Object> reqMap) throws  Exception{
         int pageNum =Integer.parseInt(reqMap.get("pageNum").toString());
         int pageSize =Integer.parseInt(reqMap.get("pageSize").toString());
         int count = icommonMapper.queryInt("select count(1) from sys_module");
@@ -97,7 +97,7 @@ public class ModuleController {
 
     @RequestMapping(value="/module/add",method= RequestMethod.POST)
     @ResponseBody
-    public Map<Object,Object> configadd(@RequestBody Map<String,Object> reqMap,HttpServletRequest request){
+    public Map<Object,Object> add(@RequestBody Map<String,Object> reqMap,HttpServletRequest request){
             Map<Object,Object>  map = new HashMap<Object,Object>();
         String parentcode = "";
         try {
@@ -126,7 +126,7 @@ public class ModuleController {
 
     @RequestMapping(value="/module/delete",method= RequestMethod.POST)
     @ResponseBody
-    public Map<Object,Object> configdelete(@RequestBody Map<String,Object> reqMap){
+    public Map<Object,Object> delete(@RequestBody Map<String,Object> reqMap){
         Map<Object,Object>  map = new HashMap<Object,Object>();
         try {
             String rowguid = reqMap.get("rowguid").toString();
@@ -142,7 +142,7 @@ public class ModuleController {
 
     @RequestMapping(value="/module/findone",method= RequestMethod.POST)
     @ResponseBody
-    public Map<Object,Object> configfindone(@RequestBody Map<String,Object> reqMap){
+    public Map<Object,Object> findone(@RequestBody Map<String,Object> reqMap){
         Map<Object,Object>  map = new HashMap<Object,Object>();
         try {
             String rowguid = reqMap.get("rowguid").toString();
