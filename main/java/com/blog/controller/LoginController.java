@@ -2,6 +2,7 @@ package com.blog.controller;
 
 
 import com.blog.entity.Frame_User;
+import com.blog.service.CommonDaoService;
 import com.blog.util.CommonDao;
 import com.blog.util.Encrpt;
 import com.blog.util.RedisUtil;
@@ -26,10 +27,17 @@ public class LoginController {
 
     private CommonDao commonDao = new CommonDao();
     @Autowired
+    public CommonDaoService commonDaoService;
+    @Autowired
     private RedisUtil redisUtil;
     @RequestMapping("/")
     @ResponseBody
     public String home() {
+       try {
+           commonDaoService.test("723904","cnm");
+       }catch (Exception e){
+
+       }
         return "Hello World!";
     }
 

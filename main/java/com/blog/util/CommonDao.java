@@ -4,8 +4,14 @@ import com.blog.mapper.CommonMapper;
 import com.github.pagehelper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Field;
@@ -23,7 +29,6 @@ import java.util.List;
 public class CommonDao {
     @Autowired
     public CommonMapper icommonMapper;
-
     public static CommonDao commonDao;
 
     @PostConstruct
@@ -155,6 +160,29 @@ public class CommonDao {
         //System.out.println(sqlbuilder.toString());
         commonDao.icommonMapper.executeSql(sqlbuilder.toString());
     }
+    public String getUpdateSql(Object entity,String Key) throws Exception{
+        List<Field> fs = Arrays.asList(entity.getClass().getDeclaredFields());
+        StringBuilder sqlbuilder = new StringBuilder();
+        StringBuilder fieldbuilder = new StringBuilder();
+        //去除反射的类的包名
+        String tablename = entity.getClass().getName().replace(entity.getClass().getPackage().getName()+".","");
+        sqlbuilder.append(MessageFormat.format("update {0} set ",tablename));
+        for(Field f :fs){
+            if (fs.indexOf(f)==fs.size()-1){
+                fieldbuilder.append(MessageFormat.format("{0}={1}{2}{3}",f.getName(),"'",f.get(entity).toString(),"'"));
+            }else{
+                fieldbuilder.append(MessageFormat.format("{0}={1}{2}{3},",f.getName(),"'",f.get(entity).toString(),"'"));
+            }
+        }
+        for(Field f :fs){
+            if (f.getName().equals(Key)){
+                fieldbuilder.append(MessageFormat.format(" where {0}={1}",Key,"'"+f.get(entity).toString()+"'"));
+            }
+        }
+        sqlbuilder.append(" "+fieldbuilder.toString());
+        //System.out.println(sqlbuilder.toString());
+        return sqlbuilder.toString();
+    }
 
     //delete
     public void delete(Object entity,String Key){
@@ -163,15 +191,14 @@ public class CommonDao {
         commonDao.icommonMapper.executeSql(sql);
     }
 
-   @Transactional(rollbackFor=Exception.class)
-    public void executeWithTransition(List<String> sqllist){
-        try {
-            for(String sql:sqllist){
-                System.out.println(sql);
-                commonDao.icommonMapper.executeSql(sql);
+    public void executemutilsql(List<String> sqllist){
+        StringBuilder allsql = new StringBuilder();
+        for (int i=0;i<sqllist.size();i++){
+            allsql.append(sqllist.get(i));
+            if (i<sqllist.size()-1){
+                allsql.append(";");
             }
-        }catch (Exception e){
-            throw new RuntimeException("transition execute fail");
         }
+        commonDao.icommonMapper.executeSql(allsql.toString());
     }
 }

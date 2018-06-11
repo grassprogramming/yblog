@@ -37,11 +37,7 @@
         created: loadata(),
         methods:{
             save:function () {
-                savedata(
-                    OpenSuccessDialog("添加成功！",function () {
-                        CloseDialog();
-                    })
-                )
+                savedata()
             },
             close:function () {
                 CloseDialog();
@@ -61,7 +57,9 @@
             dataType : "json",
             complete: function (data, status) {
                 if(JSON.parse(data.responseText).executestatus=="1"){
-                    callback;
+                    OpenSuccessDialog("添加成功！",function () {
+                        CloseDialog();
+                    })
                 }else{
                     OpenErrorDialog("保存数据失败！");
                 }

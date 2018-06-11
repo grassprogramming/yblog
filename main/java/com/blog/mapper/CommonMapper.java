@@ -2,6 +2,8 @@ package com.blog.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,5 +17,8 @@ public interface CommonMapper {
     public void executeSql(@Param("sqlStr") String sqlStr);
     public int queryInt(@Param("sqlStr") String sqlStr);
     public String queryString(@Param("sqlStr") String sqlStr);
+    public int executeTransition_update(@Param("sqlStr") String sqlStr);
+    public int executeTransition_insert(@Param("sqlStr") String sqlStr);
+    public int test( @Param("password") String password, @Param("loginid") String  loginid);
 
 }

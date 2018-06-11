@@ -1,21 +1,21 @@
 package com.blog.controller;
 
-import com.blog.entity.Sys_Config;
 import com.blog.entity.Sys_Table;
 import com.blog.entity.Sys_TableStruct;
 import com.blog.mapper.CommonMapper;
+import com.blog.service.CommonDaoService;
 import com.blog.util.CommonDao;
 import com.blog.util.PageBean;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.StringUtil;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +24,11 @@ import java.util.Map;
  * Created by paul on 2018/6/5.
  */
 @RestController
+@MapperScan("com.blog.mapper")
 public class DMPController {
     public CommonDao commonDao = new CommonDao();
+    @Autowired
+    public CommonDaoService commonDaoService;
     @Autowired
     private CommonMapper icommonMapper;
     @Autowired
@@ -73,7 +76,6 @@ public class DMPController {
             sys_table.setSqltablename(sqltablename);
             sys_table.setTabletype("");
             sys_table.setOrdernum(ordernum);
-            commonDao.insert(sys_table);
             //建立表
             String createtablesql = MessageFormat.format("CREATE TABLE {0} (rowguid VARCHAR(50))",sqltablename);
             //建立表结构，增加一个rowguid字段
@@ -84,8 +86,12 @@ public class DMPController {
             sys_tableStruct.setFieldtype("VARCHAR");
             sys_tableStruct.setOrdernum(0);
             sys_tableStruct.setTablecode(sys_table.getRowguid());
-            commonDao.insert(sys_tableStruct);
             icommonMapper.executeSql(createtablesql);
+            // transition
+            List<String> sqllist = new ArrayList<>();
+            sqllist.add(commonDao.getInsertSql(sys_table));
+            sqllist.add(commonDao.getInsertSql(sys_tableStruct));
+            commonDaoService.executeSqlWithTransition(sqllist);
             map.put("executestatus","1");
         }catch (Exception e){
             e.printStackTrace();
@@ -102,11 +108,15 @@ public class DMPController {
             String rowguid = reqMap.get("rowguid").toString();
             Sys_Table sys_table = (Sys_Table)commonDao.FindEntityWithRowGuid(tablename,rowguid,Sys_Table.class);
             String sql = MessageFormat.format("delete from {0} where rowguid={1}",tablename,"'"+rowguid+"'");
-            icommonMapper.executeSql(sql);
             String fieldsql = MessageFormat.format("delete from {0} where tablecode={1}",subtablename,"'"+rowguid+"'");
-            icommonMapper.executeSql(fieldsql);
             String structsql = MessageFormat.format( "drop table {0}",sys_table.getSqltablename());
             icommonMapper.executeSql(structsql);
+
+            // transition
+            List<String> sqllist = new ArrayList<>();
+            sqllist.add(sql);
+            sqllist.add(fieldsql);
+            commonDaoService.executeSqlWithTransition(sqllist);
             map.put("executestatus","1");
         }catch (Exception e){
             map.put("executestatus","0");
@@ -194,7 +204,6 @@ public class DMPController {
             sys_tableStruct.setOrdernum(ordernum);
             sys_tableStruct.setFieldlength(fieldlength);
             sys_tableStruct.setTablecode(tablecode);
-            commonDao.insert(sys_tableStruct);
             //数据库加字段
             Sys_Table sys_table = (Sys_Table)commonDao.FindEntityWithRowGuid(tablename,tablecode,Sys_Table.class);
             String fielddefnitionsql = "";
@@ -211,8 +220,15 @@ public class DMPController {
                     fielddefnitionsql = MessageFormat.format("{0}",fieldtype);
                     break;
             }
-            String fieldsql = MessageFormat.format("alter table {0} add {1} {2}",sys_table.getSqltablename(),fieldsqlname,fielddefnitionsql);
-            icommonMapper.executeSql(fieldsql);
+            String fieldsql =MessageFormat.format( "alter table {0} add {1} {2}",
+                    sys_table.getSqltablename(),fieldsqlname,fielddefnitionsql);
+            System.out.println(fieldsql);
+            // transition
+            List<String> sqllist = new ArrayList<>();
+            sqllist.add(commonDao.getInsertSql(sys_tableStruct));
+            sqllist.add(fieldsql);
+            commonDaoService.executeSqlWithTransition(sqllist);
+
             map.put("executestatus","1");
         }catch (Exception e){
             e.printStackTrace();
@@ -230,7 +246,8 @@ public class DMPController {
             //删除数据库字段
             Sys_TableStruct sys_tableStruct = (Sys_TableStruct)commonDao.FindEntityWithRowGuid(subtablename,rowguid,Sys_TableStruct.class);
             Sys_Table sys_table = (Sys_Table)commonDao.FindEntityWithRowGuid(tablename,sys_tableStruct.getTablecode(),Sys_Table.class);
-            String fieldsql =MessageFormat.format( "alter table {0} drop column {1}",sys_table.getSqltablename(),sys_tableStruct.getFieldname());
+            String fieldsql =MessageFormat.format( "alter table {0} drop column {1}",
+                    sys_table.getSqltablename(),sys_tableStruct.getFieldname());
             icommonMapper.executeSql(fieldsql);
             //删除tablestruct表
             String sql = MessageFormat.format("delete from {0} where rowguid={1}",subtablename,"'"+rowguid+"'");
@@ -266,7 +283,9 @@ public class DMPController {
     public Map<Object,Object> tablstructesave(@RequestBody Sys_TableStruct sys_tableStruct){
         Map<Object,Object>  map = new HashMap<Object,Object>();
         try {
-            commonDao.update(sys_tableStruct,"rowguid");
+            List<String> sqllist = new ArrayList<>();
+            sqllist.add(commonDao.getUpdateSql(sys_tableStruct,"rowguid"));
+            commonDaoService.executeSqlWithTransition(sqllist);
             map.put("executestatus","1");
         }catch (Exception e){
             System.out.println(e.toString());

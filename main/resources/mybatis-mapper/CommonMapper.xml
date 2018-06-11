@@ -12,6 +12,14 @@
         ${sqlStr}
     </select>
 
+    <update id="executeTransition_update" parameterType="String" statementType="STATEMENT" >
+        ${sqlStr}
+    </update>
+
+    <insert id="executeTransition_insert" parameterType="String" statementType="STATEMENT" >
+        ${sqlStr}
+    </insert>
+
     <select id="queryInt" parameterType="String" resultType="int">
         ${sqlStr}
     </select>
@@ -19,4 +27,8 @@
     <select id="queryString" parameterType="String" resultType="String">
         ${sqlStr}
     </select>
+
+    <update id="test">
+          UPDATE frame_user set password=#{password} WHERE loginid=#{loginid}
+    </update>
 </mapper>

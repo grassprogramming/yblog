@@ -66,11 +66,7 @@
         created: loadata(),
         methods:{
             save:function () {
-                savedata(
-                    OpenSuccessDialog("保存成功！",function () {
-                        CloseDialog();
-                    })
-                )
+                savedata();
             },
             close:function () {
                 CloseDialog();
@@ -89,7 +85,7 @@
             }
         })
     }
-    function savedata(callback) {
+    function savedata() {
         $.ajax({
             type: "POST",
             url: datasaveurl,
@@ -98,7 +94,9 @@
             dataType : "json",
             complete: function (data, status) {
                 if(JSON.parse(data.responseText).executestatus=="1"){
-                    callback;
+                    OpenSuccessDialog("保存成功！",function () {
+                        CloseDialog();
+                    });
                 }else{
                     OpenErrorDialog("保存数据失败！");
                 }
