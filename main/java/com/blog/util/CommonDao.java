@@ -201,4 +201,28 @@ public class CommonDao {
         }
         commonDao.icommonMapper.executeSql(allsql.toString());
     }
+
+    public String typeMapper(String databasetype){
+        String returntype = "";
+        switch (databasetype.toLowerCase()){
+            case "nvarchar":
+            case "longtext":
+            case "varchar":
+                returntype = "String";
+                break;
+            case "int":
+                returntype = "int";
+                break;
+            case "datetime":
+                returntype="Date";
+                break;
+            case "blob":
+                returntype = "byte[]";
+            case "numeric":
+                returntype = "BigDecimal";
+                break;
+
+        }
+        return returntype;
+    }
 }

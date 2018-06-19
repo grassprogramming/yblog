@@ -89,6 +89,7 @@ public class ModuleController {
         }
         map.put("text",parentModule.getModulename());
         map.put("value",parentModule.getModulecode());
+        map.put("mouduleurl",parentModule.getModuleurl());
         if (nodemap.size()>0){
             map.put("nodes",nodemap);
         }

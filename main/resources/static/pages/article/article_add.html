@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8" />
+    <title>article_add</title>
+    <link rel="stylesheet" href="../../plugins/editor/css/editormd.min.css">
+    <link rel="stylesheet" href="../../plugins/editor/css/style.css">
+    <script src="../../common/base_stylesheet.js"></script>
+    <script src="../../common/base_javascript.js"></script>
+    <script src="../../plugins/editor/js/editormd.min.js"></script>
+
+</head>
+<body>
+<div id="layout">
+    <header>
+        <h1>文章发布</h1>
+    </header>
+    <div id="test-editormd">
+                <textarea style="display:none;">
+### 也许你曾被人笃定这辈子没什么大出息，也许你没有按照所谓的标准长成一个好少年，也许你依然迷茫不知何去何从，也许你到现在仍然一事无成。不过，就算全世界都否定你，也没关系，路很长，只要你不放弃你自己，坚持，努力，以像狗一样的昂扬姿态，专注前行。也许你曾被人笃定这辈子没什么大出息，也许你没有按照所谓的标准长成一个好少年，也许你依然迷茫不知何去何从，也许你到现在仍然一事无成。不过，就算全世界都否定你，也没关系，路很长，只要你不放弃你自己，坚持，努力，以像狗一样的昂扬姿态，专注前行。
+
+------------
+
+
+为自己奔跑，像狗一样又何妨。“当你开始认真对待自己，你总能在下划线里填上属于你自己的答案。希望我们都是步伐轻盈又专注的，像狗一样奔跑的人。”
+「ONE·一个」常驻高赞作者，萌怪青年里则林的首部作品集。当中有与众不同的独特视角，有叛逆不羁的雷人行径，有年少生活的种种记忆，有迷茫，有思考，有成长。你有可能被他的冷酷不羁所折服，也有可能因为他的种种恶搞捧腹大笑，然后在紧接着的下一秒，得到长足的温暖与感动。
+一直在遇见，也一直告别。看一个昔日荒诞不羁的少年，如何在经历和思考中成长为一个平和宽容的青年。或许从中，你可以看到过去和现在的自己。
+给所有不遗余力坚持自我的纯真少年。
+</textarea>
+    </div>
+    <div style="text-align: center">
+        <el-button type="primary" @click="save">保存</el-button>
+        <el-button type="primary" @click="close">关闭</el-button>
+    </div>
+</div>
+<script type="text/javascript">
+    var testEditor;
+    new Vue({
+        el: '#layout',
+        methods:{
+            save:function () {
+                CloseDialog();
+            },
+            close:function () {
+                CloseDialog();
+            }
+        }
+    });
+    $(function() {
+        testEditor = editormd("test-editormd", {
+            width   : "90%",
+            height  : 640,
+            syncScrolling : "single",
+            path    : "../../plugins/editor/lib/"
+        });
+    });
+</script>
+</body>
+</html>

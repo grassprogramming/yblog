@@ -1,12 +1,14 @@
 package com.blog;
 
 import com.blog.entity.Sys_Config;
+import com.blog.filter.OriginFilter;
 import com.blog.util.CommonDao;
 import com.github.pagehelper.PageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -32,5 +34,11 @@ public class BlogApplication {
 		return pageHelper;
 	}
 
+	@Bean
+	public FilterRegistrationBean indexFilterRegistration() {
+		FilterRegistrationBean registration = new FilterRegistrationBean(new OriginFilter());
+		registration.addUrlPatterns("/");
+		return registration;
+	}
 
 }

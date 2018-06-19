@@ -76,7 +76,7 @@
     var tcurrentPage=1;
     var tpagesize =15;
     var tableData = {datalist: [],currentPage:tcurrentPage,pagesize:tpagesize,totalnum:1,searchConfigName:""};
-    var dataurl = GetRootPath()+"dmp/tablestructlist";
+    var dataurl = GetRootPath()+"dmp/tablestructlist?tablecode="+getUrlParams("tablecode");
     var deletedataurl = GetRootPath()+"dmp/tablestructdelete";
     new Vue({
         el: '#app',

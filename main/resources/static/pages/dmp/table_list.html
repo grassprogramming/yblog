@@ -43,6 +43,14 @@
 
                 </template>
             </el-table-column>
+            <el-table-column label="生成代码"  width="100">
+                <template slot-scope="scope">
+                    <el-button
+                            size="mini"
+                            @click="createCode(scope.$index, scope.row)">生成代码</el-button>
+
+                </template>
+            </el-table-column>
             <el-table-column label="操作"  width="200">
                 <template slot-scope="scope">
                     <el-button
@@ -74,6 +82,7 @@
     var tableData = {datalist: [],currentPage:tcurrentPage,pagesize:tpagesize,totalnum:1,searchConfigName:""};
     var dataurl = GetRootPath()+"dmp/tablelist";
     var deletedataurl = GetRootPath()+"dmp/tabledelete";
+    var createcodeurl = GetRootPath()+"dmp/createcod";
     new Vue({
         el: '#app',
         data:tableData,
@@ -107,6 +116,20 @@
                             }
                         }
                     })
+                });
+            },
+            createCode(index, row) {
+                $.ajax({
+                    type: "POST",
+                    url: createcodeurl,
+                    contentType: "application/json;charset=uft-8",
+                    data: JSON.stringify({"rowguid":row.rowguid}),
+                    dataType : "json",
+                    complete: function (data, status) {
+                        if(JSON.parse(data.responseText).executestatus=="1"){
+                            OpenSuccessDialog("生成成功",loadata(tableData.searchConfigName));
+                        }
+                    }
                 });
             },
             search:function () {

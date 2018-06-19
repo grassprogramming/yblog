@@ -5,20 +5,19 @@ import com.blog.entity.Sys_TableStruct;
 import com.blog.mapper.CommonMapper;
 import com.blog.service.CommonDaoService;
 import com.blog.util.CommonDao;
+import com.blog.util.FileUtil;
 import com.blog.util.PageBean;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.StringUtil;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by paul on 2018/6/5.
@@ -163,8 +162,12 @@ public class DMPController {
         int pageNum =Integer.parseInt(reqMap.get("pageNum").toString());
         int pageSize =Integer.parseInt(reqMap.get("pageSize").toString());
         String searchConfigName = reqMap.get("searchConfigName").toString();
-        int count = icommonMapper.queryInt("select count(1) from "+subtablename);
         String tablecode =  request.getParameter("tablecode");
+        String countsql = MessageFormat.format("select count(1) from {0} where 1=1 ",subtablename);
+        if (!StringUtil.isEmpty(tablecode)){
+            countsql += MessageFormat.format(" and tablecode = {0}",tablecode);
+        }
+        int count = icommonMapper.queryInt("select count(1) from "+subtablename);
         PageHelper.startPage(pageNum, pageSize);
         //数据库操作要紧随分页事件后，有且只有后面的一个个sql会被分页
         String sql = MessageFormat.format("select * from {0} where 1=1 ",subtablename);
@@ -172,7 +175,7 @@ public class DMPController {
             sql += MessageFormat.format(" and fieldsqlname like {0}","'%"+searchConfigName+"%'");
         }
         if (!StringUtil.isEmpty(tablecode)){
-            sql += MessageFormat.format(" and tablecode = {0}",tablecode);
+            sql += MessageFormat.format(" and tablecode = {0}","'"+tablecode+"'");
         }
         sql +=" order by ordernum desc";
         List<Sys_TableStruct> list = commonDao.findList(sql,Sys_TableStruct.class);
@@ -215,6 +218,7 @@ public class DMPController {
                     fielddefnitionsql = MessageFormat.format("{0}(10,{1})",fieldtype,fieldlength);
                     break;
                 case "blob":
+                case "longtext":
                 case "int":
                 case "datetime":
                     fielddefnitionsql = MessageFormat.format("{0}",fieldtype);
@@ -247,7 +251,7 @@ public class DMPController {
             Sys_TableStruct sys_tableStruct = (Sys_TableStruct)commonDao.FindEntityWithRowGuid(subtablename,rowguid,Sys_TableStruct.class);
             Sys_Table sys_table = (Sys_Table)commonDao.FindEntityWithRowGuid(tablename,sys_tableStruct.getTablecode(),Sys_Table.class);
             String fieldsql =MessageFormat.format( "alter table {0} drop column {1}",
-                    sys_table.getSqltablename(),sys_tableStruct.getFieldname());
+                    sys_table.getSqltablename(),sys_tableStruct.getFieldsqlname());
             icommonMapper.executeSql(fieldsql);
             //删除tablestruct表
             String sql = MessageFormat.format("delete from {0} where rowguid={1}",subtablename,"'"+rowguid+"'");
@@ -294,4 +298,68 @@ public class DMPController {
 
         return map;
     }
+
+    @RequestMapping(value="/dmp/createcod",method= RequestMethod.POST)
+    @ResponseBody
+    public Map<Object,Object> createcod(@RequestBody Map<String,Object> reqMap){
+        Map<Object,Object>  map = new HashMap<Object,Object>();
+        try {
+            String rowguid = reqMap.get("rowguid").toString();
+            Sys_Table sys_table = (Sys_Table)commonDao.FindEntityWithRowGuid(tablename,rowguid,Sys_Table.class);
+            List<Sys_TableStruct> sys_tableStructList = (List<Sys_TableStruct>)commonDao.findList( MessageFormat.format(
+                    "select * from {0} where tablecode={1} ",subtablename,"'"+sys_table.getRowguid()+"'"),Sys_TableStruct.class);
+            //entity
+            String entityfilename = ResourceUtils.getURL("src/main/java/com/blog/gxh/entity/").getPath()+sys_table.getSqltablename()+".java";
+            System.out.println(entityfilename);
+             StringBuilder entityfilecontent = new StringBuilder();
+            entityfilecontent.append("package com.blog.gxh.entity;\n" +
+                    "\n" +
+                    "import java.io.Serializable;\n" +
+                    "import java.util.UUID;" +
+                    "import java.math.BigDecimal;\n" +
+                    "import java.util.Date;\n");
+            entityfilecontent.append(MessageFormat.format("public class {0} implements Serializable ",sys_table.getSqltablename()));
+            entityfilecontent.append("{");
+            entityfilecontent.append("\n");
+            //字段声明
+            for(Sys_TableStruct tablestruct:sys_tableStructList){
+                entityfilecontent.append("    public ");
+                entityfilecontent.append(commonDao.typeMapper(tablestruct.getFieldtype())+" ");
+                entityfilecontent.append(tablestruct.getFieldsqlname()+";"+"\n");
+            }
+            entityfilecontent.append("\n");
+            //构造函数
+            entityfilecontent.append(MessageFormat.format("    public {0}()",sys_table.getSqltablename()));
+            entityfilecontent.append("{");
+            entityfilecontent.append( "  rowguid = UUID.randomUUID().toString();");
+            entityfilecontent.append("}");
+
+            //get,set方法
+            for(Sys_TableStruct tablestruct:sys_tableStructList){
+                String camelfileldname = tablestruct.getFieldsqlname().substring(0,1).toUpperCase()+tablestruct.getFieldsqlname().substring(1,tablestruct.getFieldsqlname().length()-1);
+                entityfilecontent.append(MessageFormat.format("    public {0} get{1}()",commonDao.typeMapper(tablestruct.getFieldtype()),camelfileldname));
+                entityfilecontent.append("{");
+                entityfilecontent.append(MessageFormat.format(" return {0};" ,tablestruct.getFieldsqlname()));
+                entityfilecontent.append("}");
+
+                entityfilecontent.append("\n\n");
+                entityfilecontent.append(MessageFormat.format("    public void set{0}({1} {2})",camelfileldname,commonDao.typeMapper(tablestruct.getFieldtype()),tablestruct.getFieldsqlname()));
+                entityfilecontent.append("{");
+                entityfilecontent.append(MessageFormat.format(
+                        "  this.{0} = {0};",tablestruct.getFieldsqlname()));
+                entityfilecontent.append("}");
+                entityfilecontent.append("\n\n");
+
+            }
+            entityfilecontent.append("}");
+            FileUtil.createFile(entityfilename,entityfilecontent.toString());
+            map.put("executestatus","1");
+        }catch (Exception e){
+           e.printStackTrace();
+            map.put("executestatus","0");
+        }
+
+        return map;
+    }
+
 }

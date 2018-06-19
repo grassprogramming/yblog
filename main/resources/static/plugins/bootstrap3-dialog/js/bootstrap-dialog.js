@@ -166,6 +166,7 @@
      * ================================================ */
     var BootstrapDialog = function (options) {
         this.defaultOptions = $.extend(true, {
+            istop:false,
             id: BootstrapDialog.newGuid(),
             buttons: [],
             data: {},
@@ -225,6 +226,7 @@
      * Default options.
      */
     BootstrapDialog.defaultOptions = {
+        istop:false,
         type: BootstrapDialog.TYPE_PRIMARY,
         size: BootstrapDialog.SIZE_NORMAL,
         cssClass: '',
@@ -344,12 +346,21 @@
                 var $backdrop = $modal.data('bs.modal').$backdrop;
                 $modal.css('z-index', zIndexModal + (dialogCount - 1) * 20);
                 $backdrop.css('z-index', zIndexBackdrop + (dialogCount - 1) * 20);
+                //top打开调整这招位置
+                if(this.options.istop){
+                    $backdrop.appendTo($(window.top.document.body));
+                }
             }
 
             return this;
         },
         open: function () {
             !this.isRealized() && this.realize();
+            //顶部打开移动dialog所属窗体
+            if(this.options.istop){
+                this.getModal().appendTo($(window.top.document.body));
+            }
+
             this.getModal().modal('show');
             this.updateZIndex();
 
