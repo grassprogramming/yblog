@@ -3,6 +3,7 @@ package com.blog.controller;
 
 import com.blog.entity.Frame_User;
 import com.blog.service.CommonDaoService;
+import com.blog.spider.pageprocessor.WYCloudMusicPageProcessor;
 import com.blog.util.CommonDao;
 import com.blog.util.Encrpt;
 import com.blog.util.RedisUtil;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import us.codecraft.webmagic.Spider;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -25,7 +27,7 @@ import java.util.Map;
 @RestController
 public class LoginController {
 
-    private CommonDao commonDao = new CommonDao();
+    public CommonDao commonDao = new CommonDao();
     @Autowired
     public CommonDaoService commonDaoService;
     @Autowired
@@ -34,7 +36,12 @@ public class LoginController {
     @ResponseBody
     public String home() {
        try {
-           commonDaoService.test("723904","cnm");
+           //commonDaoService.test("723904","cnm");
+           WYCloudMusicPageProcessor test = new WYCloudMusicPageProcessor();
+           Spider.create(test)
+                   .addUrl("https://music.163.com/#/song?id=308299")
+//              .addPipeline(netEaseMusicPipeline)
+                   .run();
        }catch (Exception e){
 
        }

@@ -336,7 +336,7 @@ public class DMPController {
 
             //get,set方法
             for(Sys_TableStruct tablestruct:sys_tableStructList){
-                String camelfileldname = tablestruct.getFieldsqlname().substring(0,1).toUpperCase()+tablestruct.getFieldsqlname().substring(1,tablestruct.getFieldsqlname().length()-1);
+                String camelfileldname = tablestruct.getFieldsqlname().substring(0,1).toUpperCase()+tablestruct.getFieldsqlname().substring(1,tablestruct.getFieldsqlname().length());
                 entityfilecontent.append(MessageFormat.format("    public {0} get{1}()",commonDao.typeMapper(tablestruct.getFieldtype()),camelfileldname));
                 entityfilecontent.append("{");
                 entityfilecontent.append(MessageFormat.format(" return {0};" ,tablestruct.getFieldsqlname()));
