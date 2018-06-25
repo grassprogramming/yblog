@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>musci_search</title>
+    <script src="../../../common/base_stylesheet.js"></script>
+    <script src="../../../common/base_javascript.js"></script>
+</head>
+<body>
+<div id="app">
+    <template>
+        <el-table
+                :data="datalist"
+                style="width: 100%"  v-loading="fullscreenLoading">
+            <el-table-column
+                    type="index"
+                    label="序号"
+                    :index="indexMethod">
+            </el-table-column>
+            <el-table-column
+                    prop="NickName"
+                    label="昵称"
+                    width="280">
+            </el-table-column>
+            <el-table-column
+                    prop="CommentDate"
+                    label="评论时间"
+                    width="280">
+            </el-table-column>
+            <el-table-column
+                    prop="CommentContent"
+                    label="评论内容">
+            </el-table-column>
+        </el-table>
+    </template>
+</div>
+<script>
+    var url = getUrlParams("url");
+    var tableData = {datalist: [],url:url,fullscreenLoading: false};
+    var dataurl = GetRootPath()+"spider/music/searchcomment";
+    new Vue({
+        el: '#app',
+        data:tableData,
+        created:loadata(tableData.url),
+        methods: {
+
+            indexMethod(index) {
+                return index + 1;
+            }
+        }
+    })
+
+    //post提交，data要使用JSON.stringify进行转换，否则会作为get方法的数据跟在url后传递过去
+    function loadata(url) {
+        Vue.set(tableData,"fullscreenLoading",true);
+        $.ajax({
+            type: "POST",
+            url: dataurl,
+            contentType: "application/json;charset=uft-8",
+            data: JSON.stringify({"url":url}),
+            dataType : "json",
+            complete: function (data, status) {
+                Vue.set(tableData,"datalist",JSON.parse(data.responseText).datalist);
+                Vue.set(tableData,"fullscreenLoading",false);
+            }
+        })
+    }
+</script>
+</body>
+</html>

@@ -25,3 +25,11 @@ function getUrlParams(name) {
     if (r != null) return unescape(r[2]);
     return null;
 }
+
+function startloading() {
+
+}
+
+function endloading() {
+
+}

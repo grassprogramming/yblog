@@ -30,6 +30,7 @@ var datautiljspath = applicaitoncontext+'/common/datautil.js';
 var dialogjspath = applicaitoncontext+'/common/dialog.js';
 var boostrap3dialogpath = applicaitoncontext+"/plugins/bootstrap3-dialog/js/bootstrap-dialog.js";
 var boostraptreeviewpath = applicaitoncontext+"/plugins/bootstrap-treeview/js/bootstrap-treeview.js";
+
 loadjs(jquerypath,true);
 loadjs(pageutiljspath,true);
 loadjs(datautiljspath,true);
@@ -43,5 +44,7 @@ loadjs("https://unpkg.com/vue/dist/vue.js",false);
 loadjs("https://unpkg.com/element-ui/lib/index.js",false);
 //tree
 loadjs(boostraptreeviewpath,true);
+//loading
+
 
 
