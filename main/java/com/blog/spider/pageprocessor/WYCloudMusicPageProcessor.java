@@ -2,6 +2,7 @@ package com.blog.spider.pageprocessor;
 
 import com.blog.gxh.entity.MusicComment;
 import com.blog.gxh.entity.MusicSong;
+import com.blog.spider.entity.AuthorInfo;
 import com.blog.util.CommonDao;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.*;
@@ -17,6 +18,7 @@ import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -36,7 +38,7 @@ public class WYCloudMusicPageProcessor implements PageProcessor {
 
     @Override
     public void process(Page page) {
-        DesiredCapabilities dcaps = new DesiredCapabilities();
+        /*DesiredCapabilities dcaps = new DesiredCapabilities();
         //ssl证书支持
         dcaps.setCapability("acceptSslCerts", true);
         //截屏支持
@@ -103,11 +105,11 @@ public class WYCloudMusicPageProcessor implements PageProcessor {
 
 
         driver.close();
-        driver.quit();
+        driver.quit();*/
 
 
         //单独使用chromedriver
-          /*  System.setProperty("webdriver.chrome.driver", "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chromedriver.exe");
+            System.setProperty("webdriver.chrome.driver", "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chromedriver.exe");
         //初始化一个chrome浏览器实例，实例名称叫driver
         WebDriver driver = new ChromeDriver();
         //最大化窗口
@@ -116,13 +118,24 @@ public class WYCloudMusicPageProcessor implements PageProcessor {
         driver.manage().timeouts().implicitlyWait(8, TimeUnit.SECONDS);
 
         // get()打开一个站点
-        driver.get("https://music.163.com/#/song?id=308299");
+        driver.get("https://music.163.com/#/search/m/?s=%E5%96%9C%E5%B8%96%E8%A1%97&type=1");
         try {
             Thread.sleep(3000);
         }catch (Exception e){
             System.out.println("thread error:");
             e.printStackTrace();
-        }*/
+        }
+        driver.switchTo().frame("g_iframe");
+        driver.findElement(By.cssSelector("a[data-type='100']")).click();
+
+        List<WebElement> authorinfolist = driver.findElement(By.cssSelector("ul[class^='m-cvrlst']")).findElements(By.cssSelector("div[class^='u-cover']"));
+        List<AuthorInfo> authorlist = new ArrayList<AuthorInfo>();
+        for(WebElement author:authorinfolist){
+            AuthorInfo authorInfo = new AuthorInfo();
+            String imageurl = author.findElement(By.tagName("img")).getAttribute("src");
+            String authorname = author.findElement(By.tagName("span")).getAttribute("title");
+            System.out.println(authorname+":"+imageurl);
+        }
 
     }
 

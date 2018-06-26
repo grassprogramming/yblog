@@ -2,12 +2,21 @@ package com.blog.spider.controller;
 
 import com.blog.gxh.entity.MusicComment;
 import com.blog.gxh.entity.MusicSong;
+import com.blog.spider.entity.AlbumInfo;
+import com.blog.spider.entity.AuthorInfo;
+import com.blog.spider.entity.SongList;
 import com.blog.spider.entity.WYCloudMusic;
+import com.google.common.base.Function;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.ui.*;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by paul on 2018/6/25.
@@ -28,29 +38,17 @@ public class MusciSpiderController {
     public Map<Object,Object> searchwithname(@RequestBody Map<String,Object> reqMap) throws  Exception{
         String musicname = reqMap.get("musciname").toString();
         String loadurl = MessageFormat.format("https://music.163.com/#/search/m/?s={0}&type=1", URLEncoder.encode(musicname));
-        //抓取网页
-        DesiredCapabilities dcaps = new DesiredCapabilities();
-        //ssl证书支持
-        dcaps.setCapability("acceptSslCerts", true);
-        //截屏支持
-        dcaps.setCapability("takesScreenshot", true);
-        //css搜索支持
-        dcaps.setCapability("cssSelectorsEnabled", true);
-        //js支持
-        dcaps.setJavascriptEnabled(true);
-        try {
-            //驱动支持
-            dcaps.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY,
-                    ResourceUtils.getURL("src/main/resources/static/plugins/phantomjs/").getPath()+"phantomjs.exe");
-        }catch (Exception e){
-            System.out.println("phantomjs error");
-            e.printStackTrace();
-        }
-        //创建无界面浏览器对象
-        PhantomJSDriver driver = new PhantomJSDriver(dcaps);
+        String DRIVER_PATH = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chromedriver.exe";
+        System.setProperty("webdriver.chrome.driver",DRIVER_PATH);
+        ChromeOptions opt = new ChromeOptions();
+        //使用谷歌的无头模式 PhantomJS后续高版本不在收到seleunim的支持，且开源暂停开发
+        opt.addArguments("headless");
+        WebDriver driver = new ChromeDriver(opt);
         driver.get(loadurl);
         //切换到内嵌iframe中
         driver.switchTo().frame("g_iframe");
+
+        //单曲
         List<WebElement> songlist = driver.findElement(By.className("srchsongst")).findElements(By.cssSelector("div[class^='item']"));
         List<WYCloudMusic> datalist = new ArrayList<WYCloudMusic>();
         for(WebElement song :songlist){
@@ -67,12 +65,72 @@ public class MusciSpiderController {
             music.setUrl(url);
             datalist.add(music);
         }
+
+
+
+        //歌手
+        driver.findElement(By.cssSelector("a[data-type='100']")).click();
+        //等待页面数据加载完成
+        WebDriverWait wait = new WebDriverWait(driver, 20);
+        //com.google.guava版本问题引起的传入函数条件不满足泛型
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("ul[class^='m-cvrlst']")));
+        List<WebElement> authorinfolist = driver.findElement(By.cssSelector("ul[class^='m-cvrlst']")).findElements(By.cssSelector("div[class^='u-cover']"));
+        List<AuthorInfo> authorlist = new ArrayList<AuthorInfo>();
+        for(WebElement author:authorinfolist){
+            AuthorInfo authorInfo = new AuthorInfo();
+            String imageurl = author.findElement(By.tagName("img")).getAttribute("src");
+            String authorname = author.findElement(By.tagName("span")).getAttribute("title");
+            authorInfo.setAutorname(authorname);
+            authorInfo.setImageurl(imageurl);
+            authorlist.add(authorInfo);
+        }
+
+        //专辑
+        driver.findElement(By.cssSelector("a[data-type='10']")).click();
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("ul[class^='m-cvrlst']")));
+        List<WebElement> albuminfolist = driver.findElement(By.cssSelector("ul[class^='m-cvrlst']")).findElements(By.cssSelector("div[class^='u-cover']"));
+        List<AlbumInfo> albumlist = new ArrayList<AlbumInfo>();
+        for(WebElement album:albuminfolist){
+            AlbumInfo albumInfo = new AlbumInfo();
+            String imageurl = album.findElement(By.tagName("img")).getAttribute("src");
+            String albumname = album.findElement(By.tagName("span")).getAttribute("title");
+            albumInfo.setAlbumname(albumname);
+            albumInfo.setImageurl(imageurl);
+            albumlist.add(albumInfo);
+        }
+
+        //歌单
+        driver.findElement(By.cssSelector("a[data-type='1000']")).click();
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table[class^='m-table']")));
+        List<WebElement> songinfolist = driver.findElement(By.cssSelector("table[class^='m-table']")).findElements(By.cssSelector("tr[class^='h-flag']"));
+        List<SongList> songmenulist = new ArrayList<SongList>();
+        for (WebElement songlistinfo :songinfolist){
+            SongList songList = new SongList();
+            String imageurl = songlistinfo.findElement(By.className("w7")).findElement(By.tagName("img")).getAttribute("src");
+            String songlistname = songlistinfo.findElement(By.className("ttc")).findElement(By.tagName("a")).getAttribute("title");
+            String songlistcount =  songlistinfo.findElement(By.cssSelector("td[class^='w11']")).getText();
+            String createauthorname = songlistinfo.findElement(By.className("w4")).findElement(By.tagName("a")).getAttribute("title");
+            String collectcount = songlistinfo.findElement(By.cssSelector("td[class^='w6']")).findElement(By.tagName("span")).getText();
+            String listencount = songlistinfo.findElement(By.cssSelector("td[class^='last']")).findElement(By.tagName("span")).getText();
+            songList.setImageurl(imageurl);
+            songList.setSonglistname(songlistname);
+            songList.setSonglistcount(songlistcount);
+            songList.setCreateauthorname(createauthorname);
+            songList.setCollectcount(collectcount);
+            songList.setListencount(listencount);
+            songmenulist.add(songList);
+        }
         driver.close();
         driver.quit();
         Map<Object,Object>  map = new HashMap<Object,Object>();
         map.put("datalist",datalist);
+        map.put("authorlist",authorlist);
+        map.put("albumlist",albumlist);
+        map.put("albumlist",albumlist);
+        map.put("songmenulist",songmenulist);
         return map;
     }
+
 
     @RequestMapping(value="/spider/music/searchcomment",method= RequestMethod.POST)
     @ResponseBody
