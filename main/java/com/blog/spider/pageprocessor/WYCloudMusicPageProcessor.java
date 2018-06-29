@@ -7,6 +7,7 @@ import com.blog.util.CommonDao;
 import org.jsoup.select.Elements;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriverService;
@@ -111,31 +112,66 @@ public class WYCloudMusicPageProcessor implements PageProcessor {
         //单独使用chromedriver
             System.setProperty("webdriver.chrome.driver", "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chromedriver.exe");
         //初始化一个chrome浏览器实例，实例名称叫driver
-        WebDriver driver = new ChromeDriver();
+        //模拟手机
+        ChromeOptions options = new ChromeOptions();
+        //设置user agent为iphone5
+        options.addArguments("--user-agent=Apple Iphone 7");
+
+        WebDriver driver = new ChromeDriver(options);
         //最大化窗口
         driver.manage().window().maximize();
         //设置隐性等待时间
         driver.manage().timeouts().implicitlyWait(8, TimeUnit.SECONDS);
 
         // get()打开一个站点
-        driver.get("https://music.163.com/#/search/m/?s=%E5%96%9C%E5%B8%96%E8%A1%97&type=1");
+        driver.get("https://wenku.baidu.com/view/dac85189aef8941ea66e053b.html");
+        try {
+            Thread.sleep(5000);
+        }catch (Exception e){
+            System.out.println("thread error:");
+            e.printStackTrace();
+        }
+      /*  //滚动到最下面
+        Actions action = new Actions(driver);
+        action.moveToElement(driver.findElement(By.cssSelector("div[class='footer']"))).perform();
         try {
             Thread.sleep(3000);
         }catch (Exception e){
             System.out.println("thread error:");
             e.printStackTrace();
         }
-        driver.switchTo().frame("g_iframe");
-        driver.findElement(By.cssSelector("a[data-type='100']")).click();
+        //获取更多按钮并点击
+        WebDriverWait wait = new WebDriverWait(driver, 20);
+        //com.google.guava版本问题引起的传入函数条件不满足泛型
+        WebElement morebtn = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("span[class^='moreBtn']")));
+        morebtn.click();*/
 
-        List<WebElement> authorinfolist = driver.findElement(By.cssSelector("ul[class^='m-cvrlst']")).findElements(By.cssSelector("div[class^='u-cover']"));
-        List<AuthorInfo> authorlist = new ArrayList<AuthorInfo>();
-        for(WebElement author:authorinfolist){
-            AuthorInfo authorInfo = new AuthorInfo();
-            String imageurl = author.findElement(By.tagName("img")).getAttribute("src");
-            String authorname = author.findElement(By.tagName("span")).getAttribute("title");
-            System.out.println(authorname+":"+imageurl);
+        try {
+            Thread.sleep(3000);
+        }catch (Exception e){
+            System.out.println("thread error:");
+            e.printStackTrace();
         }
+
+        try {
+            driver.findElement(By.className("foldpagewg-text-con")).click();
+            Thread.sleep(2000);
+        }catch (Exception e){
+
+        }
+
+        StringBuilder doc = new StringBuilder();
+        List<WebElement> doccontentlist = driver.findElements(By.cssSelector("div[class^='rtcspage']"));
+        for(WebElement doccontent:doccontentlist){
+            List<WebElement> plist = doccontent.findElements(By.cssSelector("p[class^='rtcscls']"));
+            for(WebElement p:plist){
+                doc.append(p.getText());
+                doc.append("\n");
+            }
+        }
+        System.out.println(doc);
+        driver.close();
+        driver.quit();
 
     }
 

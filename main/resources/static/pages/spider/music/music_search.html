@@ -39,11 +39,18 @@
                             prop="time"
                             label="歌曲时常">
                     </el-table-column>
-                    <el-table-column label="操作"  width="200">
+                    <el-table-column label="操作"  width="100">
                         <template slot-scope="scope">
                             <el-button
                                     size="mini"
                                     @click="handleEdit(scope.$index, scope.row)">查看详情</el-button>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="下载"  width="100">
+                        <template slot-scope="scope">
+                            <el-button
+                                    size="mini"
+                                    @click="downloadSong(scope.$index, scope.row)">下载</el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -103,6 +110,7 @@
 <script>
     var tableData = {datalist: [],authorlist:[],albumlist:[],songmenulist:[],musciname:"",fullscreenLoading: false, activeName: 'first'};
     var dataurl = GetRootPath()+"spider/music/searchwithname";
+    var downloadurl = GetRootPath()+"spider/music/download";
     new Vue({
         el: '#app',
         data:tableData,
@@ -112,6 +120,23 @@
             },
             handleEdit(index, row) {
                 OpenDialog("editdialog","查看评论","pages/spider/music/music_detail.html?url="+row.url,600,1200,afterClose);
+            },
+            downloadSong(index, row) {
+                $.ajax({
+                    type: "POST",
+                    url: downloadurl,
+                    contentType: "application/json;charset=uft-8",
+                    data: JSON.stringify({"songid":row.songid}),
+                    dataType : "json",
+                    complete: function (data, status) {
+                        //ajax回调函数中执行window.open或者模拟click事件，由于跳转操作不是用户主动触发，会被认为不安全，浏览器会进行拦截。
+                        //window.open(JSON.parse(data.responseText).downloadurl);
+                        var elemIF = document.createElement("iframe");
+                        elemIF.src = JSON.parse(data.responseText).downloadurl;
+                        elemIF.style.display = "none";
+                        document.body.appendChild(elemIF);
+                    }
+                })
             },
             search:function () {
                 loadata(tableData.musciname);

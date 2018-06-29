@@ -5,7 +5,7 @@ package com.blog.spider.entity;
  */
 public class WYCloudMusic {
 
-
+    public String songid;
     public String musicname;
     public String author;
     public String album;
@@ -50,5 +50,13 @@ public class WYCloudMusic {
 
     public void setUrl(String url) {
         Url = url;
+    }
+
+    public String getSongid() {
+        return songid;
+    }
+
+    public void setSongid(String songid) {
+        this.songid = songid;
     }
 }

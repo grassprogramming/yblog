@@ -6,6 +6,7 @@ import com.blog.spider.entity.AlbumInfo;
 import com.blog.spider.entity.AuthorInfo;
 import com.blog.spider.entity.SongList;
 import com.blog.spider.entity.WYCloudMusic;
+import com.blog.util.CommonUtil;
 import com.google.common.base.Function;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -20,6 +21,12 @@ import org.openqa.selenium.support.ui.*;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -53,11 +60,13 @@ public class MusciSpiderController {
         List<WYCloudMusic> datalist = new ArrayList<WYCloudMusic>();
         for(WebElement song :songlist){
             WYCloudMusic music = new WYCloudMusic();
+            String songid =  song.findElement(By.cssSelector("div:nth-child(1)")).findElement(By.tagName("a")).getAttribute("data-res-id");
             String url = URLEncoder.encode(song.findElement(By.cssSelector("div[class$='w0']")).findElement(By.tagName("a")).getAttribute("href"));
             String musciname = song.findElement(By.cssSelector("div[class$='w0']")).findElement(By.tagName("b")).getAttribute("title");
-            String author = song.findElement(By.cssSelector("div[class$='w1']")).findElement(By.tagName("a")).getText();
+            String author = song.findElement(By.cssSelector("div[class$='w1']")).findElement(By.className("text")).getText();
             String album = song.findElement(By.cssSelector("div[class$='w2']")).findElement(By.tagName("a")).getText();
             String time = song.findElement(By.cssSelector("div:nth-child(6)")).getText();
+            music.setSongid(songid);
             music.setMusicname(musciname);
             music.setAuthor(author);
             music.setAlbum(album);
@@ -187,4 +196,38 @@ public class MusciSpiderController {
         map.put("datalist",datalist);
         return map;
     }
+
+    @RequestMapping(value="/spider/music/download",method= RequestMethod.POST)
+    @ResponseBody
+    public Map<Object,Object> download(@RequestBody Map<String,Object> reqMap,HttpServletRequest request) throws  Exception{
+        String songid = reqMap.get("songid").toString();
+        String savepath = "D:\\"+songid+".mp4";
+        try {
+            // 构造URL
+            URL url = new URL("http://music.163.com/song/media/outer/url?id="+songid);
+            // 打开URL连接
+            URLConnection con = url.openConnection();
+            // 得到URL的输入流
+            InputStream input = con.getInputStream();
+            // 设置数据缓冲
+            byte[] bs = new byte[1024 * 2];
+            // 读取到的数据长度
+            int len;
+            // 输出的文件流保存图片至本地
+            OutputStream os = new FileOutputStream(savepath);
+            while ((len = input.read(bs)) != -1) {
+                os.write(bs, 0, len);
+            }
+            os.close();
+            input.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        Map<Object,Object>  map = new HashMap<Object,Object>();
+        String downloadurl = CommonUtil.GetProjectUrl(request)+"attach/tempfiledownload?filepath="+URLEncoder.encode(savepath);
+        map.put("downloadurl",downloadurl);
+        return map;
+    }
+
+
 }
