@@ -33,8 +33,7 @@ var boostraptreeviewpath = applicaitoncontext+"/plugins/bootstrap-treeview/js/bo
 
 loadjs(jquerypath,true);
 loadjs(pageutiljspath,true);
-loadjs(datautiljspath,true);
-loadjs(jquerypath,true);
+loadjs(datautiljspath,false);
 //dialog
 loadjs(boostrappath,true);
 loadjs(boostrap3dialogpath,true);

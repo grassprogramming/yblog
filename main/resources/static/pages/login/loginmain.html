@@ -11,7 +11,8 @@
             margin-right: 200px;
             margin-top: 15%;
             float: right;
-            width: 300px;
+            width: 400px;
+            border:solid 1px black;
         }
         .el-input-group__prepend{
             width: 70px;
@@ -19,6 +20,7 @@
         }
 
     </style>
+    <script src="../../common/datautil.js"></script>
 </head>
 <body>
 <div>
@@ -26,25 +28,27 @@
 
     </div>
     <div id="login-content">
-        <el-row>
-            <el-col :span="24">
-                <el-input id="loginid"  v-model="loginid" placeholder="请输入用户名">
-                    <template style="width: 100px"  slot="prepend" >帐号</template>
+        <el-form ref="form" :model="form" label-width="80px" style="margin:20px">
+            <el-form-item label="用户名">
+                <el-input id="loginid"  v-model="form.loginid" placeholder="请输入用户名">
                 </el-input>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="24">
-                <el-input id="password" v-model="password" type="password" placeholder="请输入密码">
-                    <template slot="prepend">密码</template>
+            </el-form-item>
+            <el-form-item label="密码">
+                <el-input id="password" v-model="form.password" type="password" placeholder="请输入密码">
                 </el-input>
-            </el-col>
-        </el-row>
-        <el-row>
-            <el-col :span="24">
+            </el-form-item>
+            <el-form-item label="验证码">
+                <el-input id="imagecode"  v-model="form.imagecode" placeholder="请输入验证码" style="width:60%">
+                </el-input>
+                <img alt="验证码" onclick = "this.src='/blog/login/getidentificodeing?d='+new Date()*1" src="/blog/login/getidentificodeing" />
+
+            </el-form-item>
+            <el-form-item>
                 <el-button id="login" v-on:click="check" style="width:100%" type="primary">登陆</el-button>
-            </el-col>
-        </el-row>
+            </el-form-item>
+        </el-form>
+
+
     </div>
 </div>
 </body>
@@ -52,14 +56,19 @@
     new Vue({
         el : '#login-content',
         data : {
-            loginid : '',
-            password : ''
+            form: {
+                loginid : '',
+                password : '',
+                imagecode:''
+            }
+
         },
         methods : {
             check : function(event){
                 //获取值
-                var loginid = this.loginid;
-                var password = this.password;
+                var loginid = this.form.loginid;
+                var password = this.form.password;
+                var imagecode = this.form.imagecode;
                 if(loginid == '' || password == ''){
                     this.$message({
                         message : '账号或密码为空！',
@@ -74,7 +83,8 @@
                     type : 'post',
                     data : {
                         loginid : loginid,
-                        auth : auth
+                        auth : auth,
+                        imagecode:imagecode
                     },
                     success : function(data) {
                         var status = data.status;
