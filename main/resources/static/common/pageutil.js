@@ -27,9 +27,9 @@ function getUrlParams(name) {
 }
 
 function startloading() {
-
+    AddShade();
 }
 
 function endloading() {
-
+    RemoveShade();
 }

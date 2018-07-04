@@ -153,7 +153,8 @@
 
     //post提交，data要使用JSON.stringify进行转换，否则会作为get方法的数据跟在url后传递过去
     function loadata(musciname) {
-        Vue.set(tableData,"fullscreenLoading",true);
+        //Vue.set(tableData,"fullscreenLoading",true);
+        startloading();
         $.ajax({
             type: "POST",
             url: dataurl,
@@ -165,7 +166,8 @@
                 Vue.set(tableData,"authorlist",JSON.parse(data.responseText).authorlist);
                 Vue.set(tableData,"albumlist",JSON.parse(data.responseText).albumlist);
                 Vue.set(tableData,"songmenulist",JSON.parse(data.responseText).songmenulist);
-                Vue.set(tableData,"fullscreenLoading",false);
+                //Vue.set(tableData,"fullscreenLoading",false);
+                endloading();
             }
         })
     }

@@ -1,5 +1,6 @@
 package com.blog.util;
 
+import com.blog.entity.Sys_Config;
 import com.blog.mapper.CommonMapper;
 import com.github.pagehelper.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,14 @@ public class CommonDao {
             returnlist.add(obj);
         }
         return returnlist;
+    }
+    //select page
+    public PageBean<Object> findListWithPage(String sql, Class entityClass, int pageNum, int pageSize) throws Exception{
+        int count = icommonMapper.queryInt(MessageFormat.format("select count(1) from {0}",getTableNameWithClassName(entityClass)));
+        List<Object> list = findList(sql,entityClass);
+        PageBean<Object> pageData = new PageBean<Object>(pageNum, pageSize,count);
+        pageData.setItems(list);
+        return pageData;
     }
     public Object FindEntity(String sql, Class entityClass) throws Exception{
         List returnlist = findList(sql,entityClass);
@@ -224,5 +233,10 @@ public class CommonDao {
 
         }
         return returntype;
+    }
+
+    public String getTableNameWithClassName(Class entityClass) throws Exception{
+        Object entity = entityClass.newInstance();
+        return entity.getClass().getName().replace(entity.getClass().getPackage().getName()+".","");
     }
 }

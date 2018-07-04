@@ -41,6 +41,7 @@ public class LoginController {
     private RedisUtil redisUtil;
     @Autowired
     DefaultKaptcha defaultKaptcha;
+
     @RequestMapping("/")
     @ResponseBody
     public String home() {

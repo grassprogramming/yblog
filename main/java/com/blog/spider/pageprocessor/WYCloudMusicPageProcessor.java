@@ -124,7 +124,7 @@ public class WYCloudMusicPageProcessor implements PageProcessor {
         driver.manage().timeouts().implicitlyWait(8, TimeUnit.SECONDS);
 
         // get()打开一个站点
-        driver.get("https://wenku.baidu.com/view/dac85189aef8941ea66e053b.html");
+        driver.get("https://wenku.baidu.com/view/6f569bbc70fe910ef12d2af90242a8956becaa2c.html");
         try {
             Thread.sleep(5000);
         }catch (Exception e){
@@ -170,8 +170,8 @@ public class WYCloudMusicPageProcessor implements PageProcessor {
             }
         }
         System.out.println(doc);
-        driver.close();
-        driver.quit();
+      /*  driver.close();
+        driver.quit();*/
 
     }
 
