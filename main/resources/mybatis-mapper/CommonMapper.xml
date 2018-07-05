@@ -31,4 +31,17 @@
     <update id="test">
           UPDATE frame_user set password=#{password} WHERE loginid=#{loginid}
     </update>
+
+    <insert id="insertBatch" parameterType="java.util.Map">
+        insert into ${params.table_name}
+        <foreach collection="params.fields" index="field"  item="fieldVal" separator="," open="(" close=")">
+            ${field}
+        </foreach>
+        values
+        <foreach collection="params.list" index="index" item="record" separator="," >
+            <foreach collection="record" index="key"  item="item" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </foreach>
+    </insert>
 </mapper>

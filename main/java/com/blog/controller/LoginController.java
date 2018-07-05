@@ -24,6 +24,7 @@ import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,7 @@ public class LoginController {
     @RequestMapping("/")
     @ResponseBody
     public String home() {
-        try {
+       /* try {
             //commonDaoService.test("723904","cnm");
             WYCloudMusicPageProcessor test = new WYCloudMusicPageProcessor();
             Spider.create(test)
@@ -54,7 +55,28 @@ public class LoginController {
                     .run();
         }catch (Exception e){
 
-        }
+        }*/
+
+        /*Frame_User user = new Frame_User();
+        user.setDisplayname("test1");
+        user.setLoginid("login1");
+        user.setUserguid("aaaaaa");
+        user.setPassword("asdasdasda");
+
+        Frame_User user1 = new Frame_User();
+        user1.setDisplayname("test2");
+        user1.setLoginid("login2");
+        user1.setUserguid("bbbbbbbb");
+        user1.setPassword("sssssss");
+
+        List<Frame_User> frameuserlist = new ArrayList<Frame_User>();
+        frameuserlist.add(user);
+        frameuserlist.add(user1);
+        try {
+            commonDao.insertBatch(frameuserlist);
+        }catch (Exception e){
+            e.printStackTrace();
+        }*/
         return "Hello World!";
     }
 

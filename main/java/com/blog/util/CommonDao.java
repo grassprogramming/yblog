@@ -3,6 +3,7 @@ package com.blog.util;
 import com.blog.entity.Sys_Config;
 import com.blog.mapper.CommonMapper;
 import com.github.pagehelper.StringUtil;
+import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -17,10 +18,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Field;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by paul on 2018/5/10.
@@ -144,6 +142,31 @@ public class CommonDao {
         //System.out.println(sqlbuilder.toString());
         return sqlbuilder.toString();
     }
+    public void insertBatch(List entityList) throws Exception{
+        Map<String,Object> params = new HashedMap();
+        String tablename =getTableNameWithEntity(entityList.get(0));
+        List<Field> fields = getFileListWithEntity(entityList.get(0));
+        List<Map<String,Object>> batchlist = GetBatchList(entityList);
+        int count = batchlist.size() / 1000;
+        int remainder = batchlist.size() % 1000;
+        for (int i = 0; i <= count; i++) {
+            List<Map<String,Object>> subList = new ArrayList<Map<String,Object>>();
+            if (i == count) {
+                if(remainder != 0){
+                    subList = batchlist.subList(i * 1000, 1000 * i + remainder);
+                }else {
+                    continue;
+                }
+            } else {
+                subList = batchlist.subList(i * 1000, 1000 * (i + 1));
+            }
+            params.put("table_name", tablename);
+            params.put("fields", subList.get(0));
+            params.put("list", subList);
+            commonDao.icommonMapper.insertBatch(params);
+        }
+    }
+    //批量插入
 
     //update
     public void update(Object entity,String Key) throws Exception{
@@ -238,5 +261,33 @@ public class CommonDao {
     public String getTableNameWithClassName(Class entityClass) throws Exception{
         Object entity = entityClass.newInstance();
         return entity.getClass().getName().replace(entity.getClass().getPackage().getName()+".","");
+    }
+
+    public String getTableNameWithEntity(Object entity) throws Exception{
+        return entity.getClass().getName().replace(entity.getClass().getPackage().getName()+".","");
+    }
+
+    public List<Field> getFileListWithEntity(Object entity) throws Exception{
+        return  Arrays.asList(entity.getClass().getDeclaredFields());
+    }
+
+    public Map<String,Object> convertEntityToMap(Object entity) throws Exception{
+        Map returnMap = new HashMap();
+        List<Field> fs = Arrays.asList(entity.getClass().getDeclaredFields());
+        for (Field f:fs){
+            String filedname = f.getName().toString();
+            Object value = f.get(entity);
+            returnMap.put(filedname,value);
+        }
+        return returnMap;
+    }
+
+    public List<Map<String,Object>> GetBatchList(List<Object> entityList) throws Exception{
+        List<Map<String,Object>> insertItems = new ArrayList<Map<String,Object>>();
+        for (Object entity : entityList) {
+            Map<String,Object> insertItem = convertEntityToMap(entity);
+            insertItems.add(insertItem);
+        }
+        return insertItems;
     }
 }

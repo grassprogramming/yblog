@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by paul on 2018/5/10.
@@ -20,5 +21,5 @@ public interface CommonMapper {
     public int executeTransition_update(@Param("sqlStr") String sqlStr);
     public int executeTransition_insert(@Param("sqlStr") String sqlStr);
     public int test( @Param("password") String password, @Param("loginid") String  loginid);
-
+    public void insertBatch(@Param("params") Map params);
 }
