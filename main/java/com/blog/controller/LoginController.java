@@ -3,31 +3,27 @@ package com.blog.controller;
 
 import com.blog.entity.Frame_User;
 import com.blog.service.CommonDaoService;
-import com.blog.spider.pageprocessor.WYCloudMusicPageProcessor;
-import com.blog.util.CommonDao;
-import com.blog.util.Encrpt;
-import com.blog.util.RedisUtil;
-import com.github.pagehelper.PageHelper;
+import com.blog.util.*;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
-import us.codecraft.webmagic.Spider;
+import org.springframework.util.ResourceUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.URLEncoder;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by paul on 2018/5/10.
@@ -80,6 +76,21 @@ public class LoginController {
         return "Hello World!";
     }
 
+    @RequestMapping("/test")
+    @ResponseBody
+    public String test() {
+        String decrptdata = "";
+        String data = "123aabb哈哈哈哈哈_asad1";
+        try {
+            String pubkpath = ResourceUtils.getURL("src/main/resources/static/lic/").getPath()+"yblog.crt";
+            String prikeypath = "C:/Users/paul/Desktop/RSA加密（JAVA）/yblog.keystore";
+            String encrptdata  = Encrpt.EncriptWRSA_Pri(data,prikeypath);
+            decrptdata = Encrpt.DecriptWithRSA_Pub(encrptdata,pubkpath);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return decrptdata;
+    }
 
     @RequestMapping("/login/loginin")
     @ResponseBody
@@ -148,6 +159,96 @@ public class LoginController {
         responseOutputStream.close();
     }
 
+    @RequestMapping(value="/login/getmachinecode",method= RequestMethod.POST)
+    @ResponseBody
+    public Map<Object,Object> getmachinecode(@RequestBody Map<String,Object> reqMap){
+        Map<Object,Object>  map = new HashMap<Object,Object>();
+        try {
+            String machineCode =LicenseAuth.getMachineCode();
+            map.put("machinecode", machineCode);
+            map.put("executestatus","1");
+        }catch (Exception e){
+            map.put("executestatus","0");
+        }
 
-
+        return map;
     }
+
+    @RequestMapping(value="/login/getlicense",method= RequestMethod.POST)
+    @ResponseBody
+    public Map<Object,Object> getLicense(@RequestBody Map<String,Object> reqMap,HttpServletRequest request){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        Map<Object,Object>  map = new HashMap<Object,Object>();
+        try {
+            String LicensePath=MessageFormat.format("D:/{0}.lic",sdf.format(new Date())+UUID.randomUUID().toString().replace("-","").substring(0,8));
+            String prikeypath = "C:/Users/paul/Desktop/RSA加密（JAVA）/yblog.keystore";
+            String machinecode =reqMap.get("machinecode").toString();
+            String islimit =reqMap.get("islimit").toString();
+            String liclimit =reqMap.get("liclimit").toString();
+            LicenseAuth.getLicense(islimit,liclimit,machinecode,LicensePath,prikeypath);
+            String downloadurl = CommonUtil.GetProjectUrl(request)+"attach/tempfiledownload?filepath="+ URLEncoder.encode(LicensePath);
+            map.put("downloadurl",downloadurl);
+            map.put("executestatus","1");
+        }catch (Exception e){
+            e.printStackTrace();
+            map.put("executestatus","0");
+        }
+
+        return map;
+    }
+
+    @RequestMapping(value="/login/licenseauth",method= RequestMethod.POST)
+    @ResponseBody
+    public Map<Object,Object> licenseauth(MultipartHttpServletRequest multiReq){
+        Map<Object,Object>  map = new HashMap<Object,Object>();
+        try {
+            String savePath = ResourceUtils.getURL("src/main/resources/static/lic").getPath();
+            MultipartFile file = multiReq.getFile("file");
+            String filename = file.getOriginalFilename();
+            File uploadfile = new File(savePath + "\\" + filename);
+            if (!uploadfile.exists()){
+                //获取item中的上传文件的输入流
+                InputStream in = file.getInputStream();
+                //创建一个文件输出流
+                FileOutputStream out = new FileOutputStream(savePath + "\\" + filename);
+                //创建一个缓冲区
+                byte buffer[] = new byte[1024];
+                //判断输入流中的数据是否已经读完的标识
+                int len = 0;
+                //循环将输入流读入到缓冲区当中，(len=in.read(buffer))>0就表示in里面还有数据
+                while((len=in.read(buffer))>0){
+                    //使用FileOutputStream输出流将缓冲区的数据写入到指定的目录(savePath + "\\" + filename)当中
+                    out.write(buffer, 0, len);
+                }
+                //关闭输入流
+                in.close();
+                //关闭输出流
+                out.close();
+            }
+            map.put("executestatus","1");
+
+        }catch (Exception e){
+            e.printStackTrace();
+            map.put("executestatus","0");
+        }
+
+        return map;
+    }
+
+    @RequestMapping(value="/login/licensevalidate",method= RequestMethod.POST)
+    @ResponseBody
+    public Map<Object,Object> licensevalidate(){
+        Map<Object,Object>  map = new HashMap<Object,Object>();
+        try {
+            if (LicenseAuth.authLicense()){
+                map.put("executestatus","1");
+            }else{
+                map.put("executestatus","0");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return map;
+    }
+
+}

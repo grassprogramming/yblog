@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>注册系统</title>
+    <script src="../../common/base_stylesheet.js"></script>
+    <script src="../../common/base_javascript.js"></script>
+    <style>
+        input[type=file]{
+            display:none;
+        }
+    </style>
+
+</head>
+<body>
+
+<div id="machinecode" style="text-align: center;margin-top: 50px">
+
+</div>
+<div id="app" style="text-align: center">
+    <el-upload
+            class="upload-demo"
+            :action="data.url"
+            :on-success="handleAvatarSuccess"
+            >
+        <el-button size="small" type="primary">点击上传</el-button>
+        <div slot="tip" class="el-upload__tip">请选择lic注册文件</div>
+    </el-upload>
+</div>
+</body>
+<script>
+    var dataurl = GetRootPath()+"login/getmachinecode";
+    var uploadurl = GetRootPath()+"login/licenseauth";
+    var authurl = GetRootPath()+"login/licensevalidate";
+    $.ajax({
+        type: "POST",
+        url: dataurl,
+        contentType: "application/json;charset=uft-8",
+        data: JSON.stringify({}),
+        dataType : "json",
+        complete: function (data, status) {
+            if(JSON.parse(data.responseText).executestatus=="1"){
+                $("#machinecode").text("机器码："+JSON.parse(data.responseText).machinecode)
+            }
+        }
+    })
+    var tableData = {data:{url:uploadurl}};
+    new Vue({
+        el: '#app',
+        data:tableData,
+        methods: {
+            handleAvatarSuccess(res, file) {
+                $.ajax({
+                    type: "POST",
+                    url: authurl,
+                    contentType: "application/json;charset=uft-8",
+                    data: JSON.stringify({}),
+                    dataType : "json",
+                    complete: function (data, status) {
+                        if(JSON.parse(data.responseText).executestatus=="1"){
+                            $(window).attr('location', GetRootPath()+"pages/login/loginmain.html");
+                        }
+                    }
+                })
+            }
+        }
+    })
+</script>
+</html>

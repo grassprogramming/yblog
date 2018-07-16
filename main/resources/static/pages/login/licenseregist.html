@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>注册码生成</title>
+    <script src="../../common/base_stylesheet.js"></script>
+    <script src="../../common/base_javascript.js"></script>
+</head>
+<body>
+<div id="app" style="width:600px;margin-left:30%">
+    <el-form ref="form" :model="data" label-width="120px" >
+        <el-form-item label="机器码">
+            <el-input v-model="data.machinecode"></el-input>
+        </el-form-item>
+        <el-form-item label="证书是否永久">
+            <template>
+                <el-radio v-model="data.islimit" label="1">是</el-radio>
+                <el-radio v-model="data.islimit" label="0">否</el-radio>
+            </template>
+        </el-form-item>
+        <el-form-item label="证书时效">
+            <el-date-picker
+                    v-model="data.liclimit"
+                    type="date"
+                    placeholder="选择日期"
+                    format="yyyy-MM-dd">
+            </el-date-picker>
+        </el-form-item>
+    </el-form>
+    <div style="text-align: center">
+        <el-button type="primary" @click="save">生成证书</el-button>
+    </div>
+</div>
+</body>
+<script>
+    var dataurl = GetRootPath()+"login/getlicense";
+    var tableData = {data:{machinecode:"",islimit:"0",liclimit:""}};
+    new Vue({
+        el: '#app',
+        data:tableData,
+        methods:{
+            save:savedata
+        }
+    })
+
+    function savedata() {
+        alert( JSON.stringify(tableData.data))
+        $.ajax({
+            type: "POST",
+            url: dataurl,
+            contentType: "application/json;charset=uft-8",
+            data: JSON.stringify(tableData.data),
+            dataType : "json",
+            complete: function (data, status) {
+                if(JSON.parse(data.responseText).executestatus=="1"){
+                    OpenSuccessDialog("生成成功！",function () {
+                        CloseDialog();
+                    })
+                    var elemIF = document.createElement("iframe");
+                    elemIF.src = JSON.parse(data.responseText).downloadurl;
+                    elemIF.style.display = "none";
+                    document.body.appendChild(elemIF);
+                }else{
+                    OpenErrorDialog("生成证书失败！");
+                }
+            }
+        })
+    }
+</script>
+</html>

@@ -32,6 +32,32 @@ public class FileUtil {
     }
 
     /**
+     * 创建文件
+     * @param fileName(全路径)  文件名称
+     * @param filecontent   文件内容
+     * @return  是否创建成功，成功则返回true
+     */
+    public static boolean createFileAndWriteLines(String fileName,String[] filecontent){
+        Boolean bool = false;
+        File file = new File(fileName);
+        try {
+            //如果文件不存在，则创建新的文件
+            if(!file.exists()){
+                file.createNewFile();
+                bool = true;
+                //创建文件成功后，写入内容到文件里
+                for(String item:filecontent){
+                    writeFileContent(fileName, item);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return bool;
+    }
+
+    /**
      * 向文件中写入内容
      * @param filepath 文件路径与名称
      * @param newstr  写入的内容
@@ -91,5 +117,50 @@ public class FileUtil {
             }
         }
         return bool;
+    }
+
+    public static String readFileToString(String fileName) {
+        String encoding = "UTF-8";
+        File file = new File(fileName);
+        Long filelength = file.length();
+        byte[] filecontent = new byte[filelength.intValue()];
+        try {
+            FileInputStream in = new FileInputStream(file);
+            in.read(filecontent);
+            in.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            return new String(filecontent, encoding);
+        } catch (UnsupportedEncodingException e) {
+            System.err.println("The OS does not support " + encoding);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String readFileToString(File file) {
+        String encoding = "UTF-8";
+        Long filelength = file.length();
+        byte[] filecontent = new byte[filelength.intValue()];
+        try {
+            FileInputStream in = new FileInputStream(file);
+            in.read(filecontent);
+            in.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            return new String(filecontent, encoding);
+        } catch (UnsupportedEncodingException e) {
+            System.err.println("The OS does not support " + encoding);
+            e.printStackTrace();
+            return null;
+        }
     }
 }
