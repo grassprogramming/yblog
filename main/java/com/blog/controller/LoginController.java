@@ -6,6 +6,8 @@ import com.blog.service.CommonDaoService;
 import com.blog.util.*;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,6 +40,8 @@ public class LoginController {
     private RedisUtil redisUtil;
     @Autowired
     DefaultKaptcha defaultKaptcha;
+    @Autowired
+    private JavaMailSender mailSender;
 
     @RequestMapping("/")
     @ResponseBody
@@ -90,6 +94,19 @@ public class LoginController {
             e.printStackTrace();
         }
         return decrptdata;
+    }
+
+    @RequestMapping("/mailtest")
+    @ResponseBody
+    public String mailtest() {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setSubject("邮件测试");
+        message.setText("hello world");
+        message.setFrom("506511437@qq.com");
+        message.setTo("yanpeng19940119@gmail.com");
+        message.setSentDate(new Date());
+        mailSender.send(message);
+        return "ok";
     }
 
     @RequestMapping("/login/loginin")

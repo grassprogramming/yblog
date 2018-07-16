@@ -24,9 +24,20 @@ public class WebMachineRegistInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) throws Exception {
         //TODO 请求拦截处理逻辑
-        boolean isregist = LicenseAuth.authLicense();
-        if (!isregist){
-            httpServletResponse.sendRedirect(httpServletRequest.getContextPath()+"/pages/login/licenseauth.html");
+        boolean isregist = true;
+        Map<String,String> sessionmap = null;
+        try {
+            HttpSession session = httpServletRequest.getSession(true);
+            sessionmap = (Map<String,String>)redisUtil.redisTemplateGet(session.getId());
+            //已登陆不再判断lic
+            if (null==sessionmap){
+                isregist= LicenseAuth.authLicense();
+                if (!isregist){
+                    httpServletResponse.sendRedirect(httpServletRequest.getContextPath()+"/pages/login/licenseauth.html");
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
         return isregist;
     }
