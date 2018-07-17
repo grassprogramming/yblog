@@ -5,15 +5,21 @@ import com.blog.entity.Frame_User;
 import com.blog.service.CommonDaoService;
 import com.blog.util.*;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
+import freemarker.template.Template;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import javax.imageio.ImageIO;
+import javax.mail.internet.MimeMessage;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,6 +40,7 @@ import java.util.*;
 public class LoginController {
 
     public CommonDao commonDao = new CommonDao();
+    public MailUtil mailUtil = new MailUtil();
     @Autowired
     public CommonDaoService commonDaoService;
     @Autowired
@@ -42,6 +49,9 @@ public class LoginController {
     DefaultKaptcha defaultKaptcha;
     @Autowired
     private JavaMailSender mailSender;
+    @Autowired
+    private FreeMarkerConfigurer configurer;
+
 
     @RequestMapping("/")
     @ResponseBody
@@ -99,13 +109,19 @@ public class LoginController {
     @RequestMapping("/mailtest")
     @ResponseBody
     public String mailtest() {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setSubject("邮件测试");
-        message.setText("hello world");
-        message.setFrom("506511437@qq.com");
-        message.setTo("yanpeng19940119@gmail.com");
-        message.setSentDate(new Date());
-        mailSender.send(message);
+        try {
+            Map<String, Object> model = new HashMap<>();
+            model.put("name", "张久久");
+            model.put("workID", "12030524");
+            model.put("contractTerm", "3");
+            model.put("beginContract", Calendar.getInstance().getTime());
+            model.put("endContract", Calendar.getInstance().getTime());
+            model.put("departmentName", "研发一部");
+            model.put("posName", "研发工程师");
+            mailUtil.SenHtmlMail_FMTemplate("yanpeng19940119@gmail.com","YBLOG邮件","mail_hello.ftl",model);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         return "ok";
     }
 
